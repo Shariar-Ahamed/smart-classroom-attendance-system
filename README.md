@@ -129,7 +129,7 @@ JWT_SECRET=your-secret-key-change-me
 CAMERA_SOURCE=0  # Use 0 for webcam, or use RTSP stream link
 ```
 
-Run the backend server (starts on port 5000):
+Run the backend server (starts on `http://localhost:5000`):
 ```bash
 python app.py
 ```
@@ -144,7 +144,7 @@ cd ..
 # Install frontend dependencies
 npm install
 
-# Run the development server (starts on port 5173)
+# Run the development server (starts on http://localhost:5173)
 npm run dev
 ```
 
