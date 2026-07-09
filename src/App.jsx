@@ -10,6 +10,7 @@ import AttendanceRecords from "./components/AttendanceRecords";
 import ManualAttendance from "./components/ManualAttendance";
 import StudentDashboard from "./components/StudentDashboard";
 import CoursesManager from "./components/CoursesManager";
+import Footer from "./components/Footer";
 
 const VIEW_META = {
   dashboard: {
@@ -66,7 +67,7 @@ function Shell() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex">
       <Sidebar view={safeView} setView={setView} />
-      <main className="flex-1 min-w-0">
+      <main className="flex-1 min-w-0 flex flex-col min-h-screen">
         <header className="px-8 py-5 border-b border-slate-800 bg-slate-900/40 backdrop-blur sticky top-0 z-10">
           <div className="flex items-center justify-between">
             <div>
@@ -80,7 +81,7 @@ function Shell() {
             </div>
           </div>
         </header>
-        <div className="p-6 lg:p-8">
+        <div className="p-6 lg:p-8 flex-1">
           {safeView === "dashboard" && <Dashboard />}
           {safeView === "live" && user.role === "FACULTY" && <LiveAttendance />}
           {safeView === "manual" && user.role === "FACULTY" && (
@@ -93,6 +94,7 @@ function Shell() {
           {safeView === "records" && <AttendanceRecords />}
           {safeView === "courses" && user.role === "ADMIN" && <CoursesManager />}
         </div>
+        <Footer />
       </main>
     </div>
   );
