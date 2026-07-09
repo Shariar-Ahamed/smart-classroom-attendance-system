@@ -9,7 +9,8 @@ import {
   Users,
   FolderOpen,
   LogOut,
-  GraduationCap
+  GraduationCap,
+  ChevronRight
 } from "lucide-react";
 
 const ALL_ITEMS = [
@@ -31,26 +32,29 @@ export default function Sidebar({ view, setView }) {
   });
 
   return (
-    <aside className="w-64 bg-slate-900/60 backdrop-blur-lg border-r border-slate-800/80 flex flex-col h-screen sticky top-0 z-20">
+    <aside className="w-64 bg-slate-950/80 backdrop-blur-xl border-r border-slate-800/80 flex flex-col h-screen sticky top-0 z-20">
       {/* Brand Header */}
-      <div className="px-5 py-5 border-b border-slate-800/80">
+      <div className="px-6 py-6 border-b border-slate-900">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-            <GraduationCap className="w-6 h-6 text-white" />
-          </div>
+          <motion.div
+            whileHover={{ scale: 1.05, rotate: [0, -5, 5, 0] }}
+            className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 border border-indigo-400/20"
+          >
+            <GraduationCap className="w-5.5 h-5.5 text-white" />
+          </motion.div>
           <div>
-            <div className="font-semibold text-slate-100 leading-tight tracking-wide">
+            <div className="font-bold text-slate-100 text-base tracking-wide">
               SmartAttend
             </div>
-            <div className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider mt-0.5">
+            <div className="text-[9px] text-indigo-400 font-extrabold uppercase tracking-widest mt-0.5 animate-pulse">
               AI Attendance
             </div>
           </div>
         </div>
       </div>
 
-      {/* Navigation list with animated sliding background pill */}
-      <nav className="flex-1 px-3 py-6 space-y-1 relative">
+      {/* Navigation list with animated sliding background pill and vertical glowing indicators */}
+      <nav className="flex-1 px-3 py-6 space-y-1.5 relative overflow-y-auto">
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = view === item.id;
@@ -58,7 +62,7 @@ export default function Sidebar({ view, setView }) {
             <button
               key={item.id}
               onClick={() => setView(item.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition relative select-none font-medium ${
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition relative select-none font-semibold ${
                 isActive ? "text-white" : "text-slate-400 hover:text-slate-200"
               }`}
             >
@@ -67,29 +71,53 @@ export default function Sidebar({ view, setView }) {
                 <motion.div
                   layoutId="activeSidebarTab"
                   transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  className="absolute inset-0 bg-gradient-to-r from-indigo-500/15 to-fuchsia-500/5 border border-indigo-500/20 rounded-lg -z-10"
+                  className="absolute inset-0 bg-slate-900 border border-slate-800/80 rounded-xl -z-10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] shadow-lg"
                 />
               )}
-              <Icon className={`w-4.5 h-4.5 transition-colors ${isActive ? "text-indigo-400" : "text-slate-500 group-hover:text-slate-300"}`} />
-              <span>{item.label}</span>
+
+              {/* Sliding Vertical Neon Glow Indicator (left edge) */}
+              {isActive && (
+                <motion.div
+                  layoutId="activeSidebarIndicator"
+                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  className="absolute left-0 w-1 h-5.5 bg-gradient-to-b from-indigo-500 to-fuchsia-500 rounded-r-full shadow-[0_0_8px_rgba(99,102,241,0.8)]"
+                />
+              )}
+
+              {/* Icon with scaling & color transition */}
+              <motion.div
+                animate={{ scale: isActive ? 1.08 : 1 }}
+                className="shrink-0"
+              >
+                <Icon className={`w-4.5 h-4.5 transition-colors duration-300 ${isActive ? "text-indigo-400" : "text-slate-500 group-hover:text-slate-300"}`} />
+              </motion.div>
+
+              <span className="flex-1 text-left">{item.label}</span>
+
+              {isActive && (
+                <ChevronRight className="w-3.5 h-3.5 text-indigo-400/80 shrink-0" />
+              )}
             </button>
           );
         })}
       </nav>
 
       {/* User Card Profile & Logout */}
-      <div className="p-3 border-t border-slate-800/80">
-        <div className="px-3 py-2.5 rounded-lg bg-slate-800/30 border border-slate-800/50 mb-2">
+      <div className="p-4 border-t border-slate-900">
+        <motion.div
+          whileHover={{ y: -2 }}
+          className="px-3.5 py-3 rounded-xl bg-slate-900/60 border border-slate-800/80 mb-3 shadow-md hover:shadow-lg transition-all duration-300"
+        >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center font-semibold text-white text-sm shadow-md">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center font-bold text-white text-sm shadow-md shadow-indigo-500/10 border border-white/10 shrink-0">
               {user?.username[0].toUpperCase()}
             </div>
-            <div className="min-w-0">
-              <div className="text-sm font-medium text-slate-100 truncate">
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-semibold text-slate-100 truncate">
                 {user?.username}
               </div>
               <div
-                className={`text-[9px] uppercase tracking-wider font-bold mt-0.5 ${
+                className={`text-[8px] uppercase tracking-widest font-extrabold mt-0.5 ${
                   user?.role === "ADMIN" ? "text-indigo-400" : "text-fuchsia-400"
                 }`}
               >
@@ -97,10 +125,11 @@ export default function Sidebar({ view, setView }) {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
+        
         <button
           onClick={logout}
-          className="w-full text-sm text-slate-400 hover:text-red-400 px-3 py-2.5 rounded-lg hover:bg-red-500/10 transition flex items-center gap-2 font-medium"
+          className="w-full text-sm text-slate-400 hover:text-red-400 px-4 py-2.5 rounded-xl hover:bg-red-500/10 transition duration-300 flex items-center gap-2 font-semibold"
         >
           <LogOut className="w-4 h-4 text-red-500/70" />
           <span>Sign out</span>
