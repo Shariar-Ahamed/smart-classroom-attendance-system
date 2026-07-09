@@ -13,7 +13,23 @@
 
 import * as faceapi from "@vladmandic/face-api";
 
-const MODEL_URL = "/models";
+const LOCAL_MODEL_URL = "/models";
+const CDN_MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/model";
+
+async function testModelPath(url) {
+  try {
+    const res = await fetch(`${url}/tiny_face_detector_model-weights_manifest.json`);
+    if (!res.ok) return false;
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      return false;
+    }
+    await res.json();
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 // --------- model loading (lazy, singleton) ---------
 
@@ -28,9 +44,14 @@ export function loadFaceModel() {
   if (loaded) return Promise.resolve();
   if (loadPromise) return loadPromise;
   loadPromise = (async () => {
-    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-    await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-    await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+    let activeUrl = LOCAL_MODEL_URL;
+    const isLocalValid = await testModelPath(activeUrl);
+    if (!isLocalValid) {
+      activeUrl = CDN_MODEL_URL;
+    }
+    await faceapi.nets.tinyFaceDetector.loadFromUri(activeUrl);
+    await faceapi.nets.faceLandmark68Net.loadFromUri(activeUrl);
+    await faceapi.nets.faceRecognitionNet.loadFromUri(activeUrl);
     loaded = true;
   })();
   return loadPromise;
