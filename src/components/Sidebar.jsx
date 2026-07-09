@@ -18,6 +18,7 @@ const ALL_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "live", label: "Live Attendance", icon: Video, faculty: true },
   { id: "manual", label: "Manual Attendance", icon: Edit3, faculty: true },
+  { id: "my-courses", label: "My Courses", icon: BookOpen, faculty: true },
   { id: "register", label: "Register Student", icon: UserPlus, admin: true },
   { id: "courses", label: "Courses", icon: BookOpen, admin: true },
   { id: "faculties", label: "Faculties", icon: GraduationCap, admin: true },

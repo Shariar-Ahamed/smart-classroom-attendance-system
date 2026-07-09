@@ -106,31 +106,33 @@ export default function StudentsList() {
           </p>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800/80">
-          <button
-            onClick={() => setActiveTab("directory")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "directory"
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/10"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <Users className="w-3.5 h-3.5" />
-            Student Directory
-          </button>
-          <button
-            onClick={() => setActiveTab("credentials")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "credentials"
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/10"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <Key className="w-3.5 h-3.5" />
-            Login Credentials
-          </button>
-        </div>
+        {/* Tab Switcher (ADMIN only) */}
+        {user?.role === "ADMIN" && (
+          <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800/80">
+            <button
+              onClick={() => setActiveTab("directory")}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "directory"
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/10"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <Users className="w-3.5 h-3.5" />
+              Student Directory
+            </button>
+            <button
+              onClick={() => setActiveTab("credentials")}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "credentials"
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/10"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <Key className="w-3.5 h-3.5" />
+              Login Credentials
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Search Input */}
@@ -158,7 +160,7 @@ export default function StudentsList() {
             <thead>
               <tr className="text-left text-xs uppercase tracking-wider text-slate-500 border-b border-slate-800">
                 <th className="py-2 px-3">Student ID</th>
-                <th className="py-2 px-3">Username</th>
+                {user?.role === "ADMIN" && <th className="py-2 px-3">Username</th>}
                 <th className="py-2 px-3">Name</th>
                 <th className="py-2 px-3">Department</th>
                 <th className="py-2 px-3">Batch</th>
@@ -178,9 +180,11 @@ export default function StudentsList() {
                   <td className="py-2.5 px-3 font-mono text-xs text-slate-300">
                     {s.student_id}
                   </td>
-                  <td className="py-2.5 px-3 font-semibold text-xs text-indigo-400">
-                    {s.username || "Pending"}
-                  </td>
+                  {user?.role === "ADMIN" && (
+                    <td className="py-2.5 px-3 font-semibold text-xs text-indigo-400">
+                      {s.username || "Pending"}
+                    </td>
+                  )}
                   <td className="py-2.5 px-3 text-slate-100 font-medium">
                     {s.name}
                   </td>

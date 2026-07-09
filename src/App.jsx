@@ -12,6 +12,7 @@ import ManualAttendance from "./components/ManualAttendance";
 import StudentDashboard from "./components/StudentDashboard";
 import CoursesManager from "./components/CoursesManager";
 import FacultiesManager from "./components/FacultiesManager";
+import FacultyCourses from "./components/FacultyCourses";
 import Footer from "./components/Footer";
 
 const VIEW_META = {
@@ -26,6 +27,10 @@ const VIEW_META = {
   manual: {
     title: "Manual Attendance",
     subtitle: "Mark Present / Absent without face recognition",
+  },
+  "my-courses": {
+    title: "My Courses",
+    subtitle: "View students enrolled in your assigned courses",
   },
   register: {
     title: "Register Student",
@@ -111,6 +116,9 @@ function Shell() {
           {safeView === "live" && user.role === "FACULTY" && <LiveAttendance />}
           {safeView === "manual" && user.role === "FACULTY" && (
             <ManualAttendance />
+          )}
+          {safeView === "my-courses" && user.role === "FACULTY" && (
+            <FacultyCourses />
           )}
           {safeView === "register" && user.role === "ADMIN" && (
             <RegisterStudent onDone={() => setView("students")} />

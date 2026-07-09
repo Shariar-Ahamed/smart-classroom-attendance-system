@@ -277,16 +277,21 @@ def list_students():
         registered_student_ids = [r["student_id"] for r in regs]
         query["student_id"] = {"$in": registered_student_ids}
 
+    is_admin = (request.user.get("role") == "ADMIN")
     students = list(students_col.find(query, projection))
     for s in students:
         if isinstance(s.get("created_at"), datetime):
             s["created_at"] = s["created_at"].isoformat()
         
-        # Look up username from users_col using student_id
-        user_doc = users_col.find_one({"student_id": s["student_id"]})
-        if user_doc:
-            s["username"] = user_doc["username"]
-            s["plain_password"] = user_doc.get("plain_password", "Encrypted/Hashed")
+        # Look up username from users_col using student_id (ADMIN only)
+        if is_admin:
+            user_doc = users_col.find_one({"student_id": s["student_id"]})
+            if user_doc:
+                s["username"] = user_doc["username"]
+                s["plain_password"] = user_doc.get("plain_password", "Encrypted/Hashed")
+            else:
+                s["username"] = None
+                s["plain_password"] = None
         else:
             s["username"] = None
             s["plain_password"] = None
