@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import CustomSelect from "./CustomSelect";
 import { api } from "../services/api";
+import ConfirmModal from "./ConfirmModal";
 
 export default function CoursesManager() {
   const [courses, setCourses] = useState([]);
@@ -8,6 +9,7 @@ export default function CoursesManager() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   // Form state
   const [courseId, setCourseId] = useState("");
@@ -60,13 +62,18 @@ export default function CoursesManager() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm(`Delete course ${id}? This cannot be undone.`)) return;
+  const handleDelete = (id) => {
+    setConfirmDelete(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDelete) return;
     setError("");
     setSuccess("");
     try {
-      await api.removeCourse(id);
-      setSuccess(`✓ Course ${id} deleted.`);
+      await api.removeCourse(confirmDelete);
+      setSuccess(`✓ Course ${confirmDelete} deleted.`);
+      setConfirmDelete(null);
       loadData();
     } catch (err) {
       setError(err.message);
@@ -265,6 +272,16 @@ export default function CoursesManager() {
           </div>
         </div>
       </div>
+
+      {/* Custom Confirm Delete Modal */}
+      <ConfirmModal
+        isOpen={!!confirmDelete}
+        title="Delete Course"
+        message={`Are you sure you want to delete course "${confirmDelete}"? This action cannot be undone.`}
+        confirmText="Delete"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmDelete(null)}
+      />
     </div>
   );
 }

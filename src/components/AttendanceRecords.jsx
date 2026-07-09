@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import CustomSelect from "./CustomSelect";
 import { api } from "../services/api";
+import ConfirmModal from "./ConfirmModal";
 
 export default function AttendanceRecords() {
   const [records, setRecords] = useState([]);
@@ -9,6 +10,7 @@ export default function AttendanceRecords() {
   const [course, setCourse] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [editingId, setEditingId] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   const load = async () => {
     let recs = await api.getAttendance({
@@ -36,10 +38,19 @@ export default function AttendanceRecords() {
     load();
   };
 
-  const removeRecord = async (id) => {
-    if (!confirm("Delete this attendance record?")) return;
-    await api.deleteAttendance(id);
-    load();
+  const removeRecord = (id) => {
+    setConfirmDelete(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDelete) return;
+    try {
+      await api.deleteAttendance(confirmDelete);
+      setConfirmDelete(null);
+      load();
+    } catch (err) {
+      alert(err.message || "Failed to delete attendance record.");
+    }
   };
 
   const exportCSV = () => {
@@ -222,6 +233,16 @@ export default function AttendanceRecords() {
           </div>
         )}
       </div>
+
+      {/* Custom Confirm Delete Modal */}
+      <ConfirmModal
+        isOpen={!!confirmDelete}
+        title="Delete Attendance Record"
+        message="Are you sure you want to delete this attendance record? This action cannot be undone."
+        confirmText="Delete"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmDelete(null)}
+      />
     </div>
   );
 }

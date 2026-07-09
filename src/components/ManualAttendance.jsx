@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import CustomSelect from "./CustomSelect";
 import { api } from "../services/api";
+import ConfirmModal from "./ConfirmModal";
 
 /**
  * Manual attendance page.
@@ -14,14 +15,13 @@ import { api } from "../services/api";
 export default function ManualAttendance() {
   const [students, setStudents] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [course, setCourse] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [records, setRecords] = useState([]);
-  const [course, setCourse] = useState("CS101");
-  const [date, setDate] = useState(
-    new Date().toISOString().slice(0, 10),
-  );
   const [q, setQ] = useState("");
   const [savedTick, setSavedTick] = useState(0);
   const [busyId, setBusyId] = useState(null);
+  const [confirmMarkAllStatus, setConfirmMarkAllStatus] = useState(null);
 
   const load = async () => {
     setStudents(await api.listStudents());
@@ -53,13 +53,14 @@ export default function ManualAttendance() {
     }
   };
 
-  const markAll = async (status) => {
-    if (
-      !confirm(
-        `Mark ALL ${students.length} students as ${status} for ${course} on ${date}?`,
-      )
-    )
-      return;
+  const markAll = (status) => {
+    setConfirmMarkAllStatus(status);
+  };
+
+  const handleConfirmMarkAll = async () => {
+    if (!confirmMarkAllStatus) return;
+    const status = confirmMarkAllStatus;
+    setConfirmMarkAllStatus(null);
     for (const s of students) {
       await api.manualMark(s.student_id, course, date, status);
     }
@@ -232,6 +233,16 @@ export default function ManualAttendance() {
           </div>
         )}
       </div>
+
+      {/* Custom Confirm Mark All Modal */}
+      <ConfirmModal
+        isOpen={!!confirmMarkAllStatus}
+        title="Bulk Attendance Action"
+        message={`Are you sure you want to mark ALL ${students.length} students as "${confirmMarkAllStatus}" for course ${course} on ${date}?`}
+        confirmText="Confirm"
+        onConfirm={handleConfirmMarkAll}
+        onCancel={() => setConfirmMarkAllStatus(null)}
+      />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { api } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, Search, Key, Users, Copy, Check, Info } from "lucide-react";
+import ConfirmModal from "./ConfirmModal";
 
 export default function FacultiesManager() {
   const { user } = useAuth();
@@ -10,6 +11,7 @@ export default function FacultiesManager() {
   const [q, setQ] = useState("");
   const [visiblePasswords, setVisiblePasswords] = useState({});
   const [copiedId, setCopiedId] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   // Reset modal state
   const [resetModalOpen, setResetModalOpen] = useState(false);
@@ -48,10 +50,15 @@ export default function FacultiesManager() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const remove = async (username) => {
-    if (!confirm(`Remove faculty member "${username}" and their login account?`)) return;
+  const remove = (username) => {
+    setConfirmDelete(username);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDelete) return;
     try {
-      await api.removeFaculty(username);
+      await api.removeFaculty(confirmDelete);
+      setConfirmDelete(null);
       refresh();
     } catch (err) {
       alert(err.message || "Failed to remove faculty member.");
@@ -367,6 +374,16 @@ export default function FacultiesManager() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Custom Confirm Delete Modal */}
+      <ConfirmModal
+        isOpen={!!confirmDelete}
+        title="Remove Faculty Member"
+        message={`Are you sure you want to remove faculty member "${confirmDelete}" and their associated login account? This action cannot be undone.`}
+        confirmText="Remove"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmDelete(null)}
+      />
     </div>
   );
 }

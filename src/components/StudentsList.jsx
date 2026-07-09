@@ -3,6 +3,7 @@ import { api } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, Search, Key, Users, Copy, Check } from "lucide-react";
+import ConfirmModal from "./ConfirmModal";
 
 export default function StudentsList() {
   const { user } = useAuth();
@@ -11,6 +12,7 @@ export default function StudentsList() {
   const [activeTab, setActiveTab] = useState("directory");
   const [visiblePasswords, setVisiblePasswords] = useState({});
   const [copiedId, setCopiedId] = useState(null); // tracking copy status animation
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   // Reset modal state
   const [resetModalOpen, setResetModalOpen] = useState(false);
@@ -29,10 +31,19 @@ export default function StudentsList() {
     refresh();
   }, []);
 
-  const remove = async (id) => {
-    if (!confirm(`Remove student ${id} and their login account?`)) return;
-    await api.removeStudent(id);
-    refresh();
+  const remove = (id) => {
+    setConfirmDelete(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDelete) return;
+    try {
+      await api.removeStudent(confirmDelete);
+      setConfirmDelete(null);
+      refresh();
+    } catch (err) {
+      alert(err.message || "Failed to remove student.");
+    }
   };
 
   const togglePasswordVisibility = (id) => {
@@ -440,6 +451,16 @@ export default function StudentsList() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Custom Confirm Delete Modal */}
+      <ConfirmModal
+        isOpen={!!confirmDelete}
+        title="Remove Student"
+        message={`Are you sure you want to remove student "${confirmDelete}" and their associated login account? This action cannot be undone.`}
+        confirmText="Remove"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmDelete(null)}
+      />
     </div>
   );
 }
