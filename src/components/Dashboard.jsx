@@ -120,7 +120,7 @@ export default function Dashboard() {
           label="Attendance %"
           value={`${percent}%`}
           icon={TrendingUp}
-          tone="fuchsia"
+          tone="purple"
           desc="Daily average rate"
         />
       </div>
@@ -156,7 +156,7 @@ export default function Dashboard() {
                     initial={{ height: 0 }}
                     animate={{ height: `${(d.count / maxBar) * 100}%` }}
                     transition={{ type: "spring", stiffness: 80, delay: 0.1 }}
-                    className="w-full bg-gradient-to-t from-indigo-500/80 via-indigo-500 to-fuchsia-500 rounded-t-lg shadow-lg shadow-indigo-500/25 min-h-[4px]"
+                    className="w-full bg-gradient-to-t from-blue-500/80 via-indigo-500 to-purple-600 rounded-t-lg shadow-lg shadow-indigo-500/25 min-h-[4px]"
                   />
                 </div>
                 <div className="text-[10px] text-slate-400 font-semibold font-mono mt-1">
@@ -175,7 +175,7 @@ export default function Dashboard() {
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-slate-100 flex items-center gap-2">
-              <Clock className="w-4.5 h-4.5 text-fuchsia-400" />
+              <Clock className="w-4.5 h-4.5 text-purple-400" />
               Today's Activity
             </h3>
             <span className="text-[10px] font-bold text-slate-500 bg-slate-800/40 px-2 py-0.5 rounded-full border border-slate-800">
@@ -266,7 +266,7 @@ export default function Dashboard() {
                             initial={{ width: 0 }}
                             animate={{ width: `${s.pct}%` }}
                             transition={{ duration: 0.5, delay: 0.2 }}
-                            className="h-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 rounded-full"
+                            className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"
                           />
                         </div>
                         <span className="text-xs text-slate-300 font-bold font-mono w-10">
@@ -299,9 +299,9 @@ function KpiCard({ label, value, icon: Icon, tone, desc }) {
       bg: "from-rose-500/15 via-rose-500/5 to-slate-900 border-rose-500/30 hover:border-rose-500/60 shadow-[0_0_20px_rgba(244,63,94,0.15)] hover:shadow-[0_0_30px_rgba(244,63,94,0.35)]",
       icon: "bg-rose-500/15 text-rose-400 border border-rose-500/30",
     },
-    fuchsia: {
-      bg: "from-fuchsia-500/15 via-fuchsia-500/5 to-slate-900 border-fuchsia-500/30 hover:border-fuchsia-500/60 shadow-[0_0_20px_rgba(217,70,239,0.15)] hover:shadow-[0_0_30px_rgba(217,70,239,0.35)]",
-      icon: "bg-fuchsia-500/15 text-fuchsia-400 border border-fuchsia-500/30",
+    purple: {
+      bg: "from-purple-500/15 via-purple-500/5 to-slate-900 border-purple-500/30 hover:border-purple-500/60 shadow-[0_0_20px_rgba(168,85,247,0.15)] hover:shadow-[0_0_30px_rgba(168,85,247,0.35)]",
+      icon: "bg-purple-500/15 text-purple-400 border border-purple-500/30",
     },
   };
 

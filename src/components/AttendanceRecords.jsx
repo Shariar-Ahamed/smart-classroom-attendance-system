@@ -162,7 +162,7 @@ export default function AttendanceRecords() {
                       <span
                         className={`text-[10px] uppercase tracking-wider font-semibold ${
                           r.source === "manual"
-                            ? "text-fuchsia-300"
+                            ? "text-purple-300"
                             : "text-indigo-300"
                         }`}
                       >

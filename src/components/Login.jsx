@@ -122,7 +122,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 text-slate-100 overflow-hidden relative select-none">
-      {/* Decorative Interactive Floating Glows */}
+      {/* Decorative Interactive Floating Glows - Blue and Purple Theme */}
       <motion.div
         animate={{
           scale: [1, 1.2, 1],
@@ -131,7 +131,7 @@ export default function Login() {
           y: [0, -30, 0],
         }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-10 left-10 w-80 h-80 bg-indigo-500/20 rounded-full blur-[80px] pointer-events-none"
+        className="absolute top-10 left-10 w-80 h-80 bg-blue-500/15 rounded-full blur-[80px] pointer-events-none"
       />
       <motion.div
         animate={{
@@ -141,7 +141,7 @@ export default function Login() {
           y: [0, 40, 0],
         }}
         transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-10 right-10 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-[100px] pointer-events-none"
+        className="absolute bottom-10 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-[100px] pointer-events-none"
       />
 
       <div className="relative w-full max-w-md">
@@ -151,15 +151,15 @@ export default function Login() {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 100 }}
-            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 shadow-lg shadow-indigo-500/30 mb-4 border border-indigo-400/20"
+            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg shadow-blue-500/30 mb-4 border border-blue-400/20"
           >
-            <GraduationCap className="w-8 h-8 text-white animate-pulse" />
+            <GraduationCap className="w-8 h-8 text-white" />
           </motion.div>
           <motion.h1
             initial={{ y: -10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1 }}
-            className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-200 via-white to-fuchsia-200"
+            className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-200 via-white to-purple-200"
           >
             SmartAttend AI
           </motion.h1>
@@ -169,19 +169,19 @@ export default function Login() {
             transition={{ delay: 0.2 }}
             className="text-slate-400 text-sm mt-1.5 flex items-center justify-center gap-1.5 font-medium"
           >
-            <Sparkles className="w-4 h-4 text-indigo-400 animate-pulse" />
+            <Sparkles className="w-4 h-4 text-blue-400 animate-pulse" />
             AI-Powered Classroom Attendance
           </motion.p>
         </div>
 
-        {/* Form Container (Opaque Glassmorphic Card for Max Separation) */}
+        {/* Form Container (Blue and Purple Theme edge) */}
         <motion.div
           layout
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className="bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-slate-800 shadow-indigo-500/5 relative"
         >
           {/* Top glowing edge line */}
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-indigo-500" />
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500" />
 
           <AnimatePresence mode="wait">
             {mode === "signin" ? (
@@ -196,7 +196,7 @@ export default function Login() {
               >
                 <div>
                   <label className="flex items-center gap-1.5 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
-                    <User className="w-3.5 h-3.5 text-indigo-400" />
+                    <User className="w-3.5 h-3.5 text-blue-400" />
                     Username
                   </label>
                   <input
@@ -205,13 +205,13 @@ export default function Login() {
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Enter your username"
                     autoComplete="username"
-                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white placeholder-slate-500 font-medium transition"
+                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-500 font-medium transition"
                     required
                   />
                 </div>
                 <div>
                   <label className="flex items-center gap-1.5 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
-                    <Lock className="w-3.5 h-3.5 text-indigo-400" />
+                    <Lock className="w-3.5 h-3.5 text-blue-400" />
                     Password
                   </label>
                   <input
@@ -220,7 +220,7 @@ export default function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
                     autoComplete="current-password"
-                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white placeholder-slate-500 font-medium transition"
+                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-500 font-medium transition"
                     required
                   />
                 </div>
@@ -252,7 +252,7 @@ export default function Login() {
                     whileTap={{ scale: 0.99 }}
                     type="submit"
                     disabled={loading}
-                    className="w-full py-2.5 bg-gradient-to-r from-indigo-500 to-fuchsia-500 hover:from-indigo-400 hover:to-fuchsia-400 rounded-xl font-bold shadow-lg shadow-indigo-500/20 disabled:opacity-50 transition duration-300 text-white flex items-center justify-center cursor-pointer"
+                    className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl font-bold shadow-lg shadow-blue-500/20 disabled:opacity-50 transition duration-300 text-white flex items-center justify-center cursor-pointer"
                   >
                     {loading ? (
                       <span className="flex items-center justify-center gap-2">
@@ -287,7 +287,7 @@ export default function Login() {
               >
                 <div className="text-xs text-slate-400 font-medium mb-1">
                   Create a{" "}
-                  <span className="text-fuchsia-400 font-bold">
+                  <span className="text-purple-400 font-bold">
                     {reg.role === "STUDENT" ? "Student" : "Faculty"}
                   </span>{" "}
                   account. Admin profiles cannot be self-registered.
@@ -301,7 +301,7 @@ export default function Login() {
                     <select
                       value={reg.role}
                       onChange={(e) => setReg({ ...reg, role: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-white text-sm font-semibold cursor-pointer"
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white text-sm font-semibold cursor-pointer"
                     >
                       <option value="FACULTY">Faculty</option>
                       <option value="STUDENT">Student</option>
@@ -310,7 +310,7 @@ export default function Login() {
                   {reg.role === "STUDENT" ? (
                     <div>
                       <label className="flex items-center gap-1 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
-                        <Hash className="w-3.5 h-3.5 text-fuchsia-400" />
+                        <Hash className="w-3.5 h-3.5 text-purple-400" />
                         Student ID
                       </label>
                       <input
@@ -318,7 +318,7 @@ export default function Login() {
                         value={reg.student_id}
                         onChange={(e) => setReg({ ...reg, student_id: e.target.value })}
                         placeholder="STU2025001"
-                        className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-white text-sm placeholder-slate-500 font-medium transition"
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white text-sm placeholder-slate-500 font-medium transition"
                         required
                       />
                     </div>
@@ -336,7 +336,7 @@ export default function Login() {
 
                 <div>
                   <label className="flex items-center gap-1.5 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
-                    <User className="w-3.5 h-3.5 text-fuchsia-400" />
+                    <User className="w-3.5 h-3.5 text-purple-400" />
                     Full Name
                   </label>
                   <input
@@ -344,7 +344,7 @@ export default function Login() {
                     value={reg.full_name}
                     onChange={(e) => setReg({ ...reg, full_name: e.target.value })}
                     placeholder="John Doe"
-                    className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-white text-sm placeholder-slate-500 font-medium transition"
+                    className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white text-sm placeholder-slate-500 font-medium transition"
                     required
                   />
                 </div>
@@ -360,25 +360,25 @@ export default function Login() {
                       onChange={(e) => setReg({ ...reg, username: e.target.value })}
                       autoComplete="username"
                       placeholder={reg.role === "STUDENT" ? "s-username" : "username"}
-                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-white text-sm placeholder-slate-500 font-medium transition"
+                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white text-sm placeholder-slate-500 font-medium transition"
                       required
                     />
                     {reg.role === "STUDENT" && (
-                      <span className="text-[9px] font-bold text-fuchsia-400 mt-1 block">
+                      <span className="text-[9px] font-bold text-purple-400 mt-1 block">
                         Must start with 's-' (e.g. s-john)
                       </span>
                     )}
                   </div>
                   <div>
                     <label className="flex items-center gap-1 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
-                      <Building className="w-3.5 h-3.5 text-fuchsia-400" />
+                      <Building className="w-3.5 h-3.5 text-purple-400" />
                       Department
                     </label>
                     <input
                       type="text"
                       value={reg.department}
                       onChange={(e) => setReg({ ...reg, department: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-white text-sm font-medium transition"
+                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white text-sm font-medium transition"
                       required
                     />
                   </div>
@@ -387,7 +387,7 @@ export default function Login() {
                 {reg.role === "STUDENT" && (
                   <div>
                     <label className="flex items-center gap-1.5 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
-                      <Calendar className="w-3.5 h-3.5 text-fuchsia-400" />
+                      <Calendar className="w-3.5 h-3.5 text-purple-400" />
                       Batch
                     </label>
                     <input
@@ -395,7 +395,7 @@ export default function Login() {
                       value={reg.batch}
                       onChange={(e) => setReg({ ...reg, batch: e.target.value })}
                       placeholder="e.g. 2025"
-                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-white text-sm placeholder-slate-500 font-medium transition"
+                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white text-sm placeholder-slate-500 font-medium transition"
                       required
                     />
                   </div>
@@ -404,7 +404,7 @@ export default function Login() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="flex items-center gap-1.5 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
-                      <Lock className="w-3.5 h-3.5 text-fuchsia-400" />
+                      <Lock className="w-3.5 h-3.5 text-purple-400" />
                       Password
                     </label>
                     <input
@@ -413,13 +413,13 @@ export default function Login() {
                       onChange={(e) => setReg({ ...reg, password: e.target.value })}
                       autoComplete="new-password"
                       placeholder="••••••••"
-                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-white text-sm placeholder-slate-500 font-medium transition"
+                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white text-sm placeholder-slate-500 font-medium transition"
                       required
                     />
                   </div>
                   <div>
                     <label className="flex items-center gap-1.5 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
-                      <Lock className="w-3.5 h-3.5 text-fuchsia-400" />
+                      <Lock className="w-3.5 h-3.5 text-purple-400" />
                       Confirm
                     </label>
                     <input
@@ -428,7 +428,7 @@ export default function Login() {
                       onChange={(e) => setReg({ ...reg, confirm: e.target.value })}
                       autoComplete="new-password"
                       placeholder="••••••••"
-                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-white text-sm placeholder-slate-500 font-medium transition"
+                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white text-sm placeholder-slate-500 font-medium transition"
                       required
                     />
                   </div>
@@ -451,7 +451,7 @@ export default function Login() {
                     whileTap={{ scale: 0.99 }}
                     type="submit"
                     disabled={loading}
-                    className="w-full py-2.5 bg-gradient-to-r from-fuchsia-500 to-pink-500 hover:from-fuchsia-400 hover:to-pink-400 rounded-xl font-bold shadow-lg shadow-fuchsia-500/20 disabled:opacity-50 transition duration-300 text-white flex items-center justify-center cursor-pointer"
+                    className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl font-bold shadow-lg shadow-purple-500/20 disabled:opacity-50 transition duration-300 text-white flex items-center justify-center cursor-pointer"
                   >
                     {loading ? (
                       <span className="flex items-center justify-center gap-2">
@@ -479,22 +479,7 @@ export default function Login() {
           </AnimatePresence>
         </motion.div>
 
-        {/* Tech Stack Indicator footer */}
-        <div className="flex items-center justify-center gap-3 text-[10px] text-slate-600 mt-6 select-none font-bold font-mono tracking-wider">
-          <span className="flex items-center gap-1 hover:text-slate-400 transition">
-            <Code className="w-3.5 h-3.5 text-indigo-500" />
-            React + Flask
-          </span>
-          <span className="text-slate-800">·</span>
-          <span className="flex items-center gap-1 hover:text-slate-400 transition">
-            <Database className="w-3.5 h-3.5 text-fuchsia-500" />
-            MongoDB
-          </span>
-          <span className="text-slate-800">·</span>
-          <span className="flex items-center gap-1 hover:text-slate-400 transition">
-            OpenCV & Dlib
-          </span>
-        </div>
+
       </div>
     </div>
   );

@@ -18,7 +18,7 @@ export default function Footer() {
         {/* AI System Badge */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-800">
-            <Cpu className="w-3.5 h-3.5 text-fuchsia-400" />
+            <Cpu className="w-3.5 h-3.5 text-purple-400" />
             <span className="font-mono text-slate-400 text-[10px]">FaceNet v1.7.13</span>
           </div>
           <div className="flex items-center gap-1.5 bg-emerald-500/5 px-2.5 py-1 rounded-lg border border-emerald-500/20 text-emerald-400 font-semibold select-none">

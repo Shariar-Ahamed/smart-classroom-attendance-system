@@ -38,7 +38,7 @@ export default function Sidebar({ view, setView }) {
         <div className="flex items-center gap-3">
           <motion.div
             whileHover={{ scale: 1.05, rotate: [0, -5, 5, 0] }}
-            className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 border border-indigo-400/20"
+            className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25 border border-indigo-400/20"
           >
             <GraduationCap className="w-5.5 h-5.5 text-white" />
           </motion.div>
@@ -80,7 +80,7 @@ export default function Sidebar({ view, setView }) {
                 <motion.div
                   layoutId="activeSidebarIndicator"
                   transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  className="absolute left-0 w-1 h-5.5 bg-gradient-to-b from-indigo-500 to-fuchsia-500 rounded-r-full shadow-[0_0_8px_rgba(99,102,241,0.8)]"
+                  className="absolute left-0 w-1 h-5.5 bg-gradient-to-b from-blue-500 to-purple-600 rounded-r-full shadow-[0_0_8px_rgba(99,102,241,0.8)]"
                 />
               )}
 
@@ -109,7 +109,7 @@ export default function Sidebar({ view, setView }) {
           className="px-3.5 py-3 rounded-xl bg-slate-900/60 border border-slate-800/80 mb-3 shadow-md hover:shadow-lg transition-all duration-300"
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center font-bold text-white text-sm shadow-md shadow-indigo-500/10 border border-white/10 shrink-0">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold text-white text-sm shadow-md shadow-indigo-500/10 border border-white/10 shrink-0">
               {user?.username[0].toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
@@ -118,7 +118,7 @@ export default function Sidebar({ view, setView }) {
               </div>
               <div
                 className={`text-[8px] uppercase tracking-widest font-extrabold mt-0.5 ${
-                  user?.role === "ADMIN" ? "text-indigo-400" : "text-fuchsia-400"
+                  user?.role === "ADMIN" ? "text-indigo-400" : "text-purple-400"
                 }`}
               >
                 {user?.role}

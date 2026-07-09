@@ -159,7 +159,7 @@ export default function CoursesManager() {
             </div>
             <button
               type="submit"
-              className="w-full py-2 bg-gradient-to-r from-indigo-500 to-fuchsia-500 hover:from-indigo-400 hover:to-fuchsia-400 rounded-lg font-medium text-sm text-white shadow-lg transition"
+              className="w-full py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-400 hover:to-purple-500 rounded-lg font-medium text-sm text-white shadow-lg transition"
             >
               Save Course
             </button>

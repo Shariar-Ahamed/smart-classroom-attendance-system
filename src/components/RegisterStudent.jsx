@@ -313,7 +313,7 @@ export default function RegisterStudent({ onDone }) {
                   <div
                     className={`h-2 rounded-full transition-all duration-300 ${
                       completed
-                        ? "bg-gradient-to-r from-indigo-500 to-fuchsia-500 shadow-md shadow-indigo-500/20"
+                        ? "bg-gradient-to-r from-blue-500 to-purple-600 shadow-md shadow-indigo-500/20"
                         : active
                           ? "bg-indigo-500/40 animate-pulse"
                           : "bg-slate-800"
@@ -438,7 +438,7 @@ export default function RegisterStudent({ onDone }) {
             whileTap={{ scale: 0.98 }}
             onClick={submit}
             disabled={busy || !done}
-            className="w-full py-2.5 bg-gradient-to-r from-indigo-500 to-fuchsia-500 hover:from-indigo-400 hover:to-fuchsia-400 text-white rounded-lg font-bold shadow-lg shadow-indigo-500/25 disabled:opacity-40 disabled:cursor-not-allowed transition duration-300 flex items-center justify-center gap-2"
+            className="w-full py-2.5 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-400 hover:to-purple-500 text-white rounded-lg font-bold shadow-lg shadow-indigo-500/25 disabled:opacity-40 disabled:cursor-not-allowed transition duration-300 flex items-center justify-center gap-2"
           >
             <UserCheck className="w-5 h-5" />
             <span>{busy ? "Registering…" : "Register Student"}</span>

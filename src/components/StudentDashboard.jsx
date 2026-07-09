@@ -99,7 +99,7 @@ export default function StudentDashboard() {
       <header className="px-6 lg:px-8 py-5 border-b border-slate-900 bg-slate-900/30 backdrop-blur sticky top-0 z-10">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-xl shadow-lg shadow-indigo-500/20">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xl shadow-lg shadow-indigo-500/20">
               🎓
             </div>
             <div>
@@ -125,7 +125,7 @@ export default function StudentDashboard() {
           {/* Profile Details Box */}
           <div className="md:col-span-2 bg-slate-900/70 border border-slate-800/80 rounded-2xl p-6 relative overflow-hidden backdrop-blur-sm">
             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-fuchsia-500/5 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/5 rounded-full blur-2xl pointer-events-none" />
 
             <div className="relative flex flex-col sm:flex-row sm:items-center gap-5">
               <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-3xl">
