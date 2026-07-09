@@ -30,10 +30,7 @@ export default function Login() {
     full_name: "",
     username: "",
     department: "Computer Science",
-    batch: "2025",
-    student_id: "",
     faculty_id: "",
-    role: "FACULTY", // FACULTY or STUDENT
     password: "",
     confirm: "",
   });
@@ -70,41 +67,19 @@ export default function Login() {
       setError("Passwords do not match.");
       return;
     }
-    if (reg.role === "STUDENT") {
-      if (!reg.username.trim().startsWith("s-")) {
-        setError("Student username must start with 's-' (e.g. s-john).");
-        return;
-      }
-      if (!reg.student_id.trim()) {
-        setError("Student ID is required.");
-        return;
-      }
-    } else {
-      if (!reg.faculty_id.trim()) {
-        setError("Faculty ID is required.");
-        return;
-      }
+    if (!reg.faculty_id.trim()) {
+      setError("Faculty ID is required.");
+      return;
     }
     setLoading(true);
     try {
-      if (reg.role === "STUDENT") {
-        await api.registerStudentUser({
-          username: reg.username.trim(),
-          password: reg.password,
-          full_name: reg.full_name.trim(),
-          department: reg.department.trim(),
-          student_id: reg.student_id.trim(),
-          batch: reg.batch.trim(),
-        });
-      } else {
-        await api.registerFaculty({
-          username: reg.username.trim(),
-          password: reg.password,
-          full_name: reg.full_name.trim(),
-          department: reg.department.trim(),
-          faculty_id: reg.faculty_id.trim(),
-        });
-      }
+      await api.registerFaculty({
+        username: reg.username.trim(),
+        password: reg.password,
+        full_name: reg.full_name.trim(),
+        department: reg.department.trim(),
+        faculty_id: reg.faculty_id.trim(),
+      });
       setInfo(
         `✓ Account created for ${reg.username}. You can now sign in below.`,
       );
@@ -114,10 +89,7 @@ export default function Login() {
         full_name: "",
         username: "",
         department: reg.department,
-        batch: reg.batch,
-        student_id: "",
         faculty_id: "",
-        role: "FACULTY",
         password: "",
         confirm: "",
       });
@@ -295,73 +267,38 @@ export default function Login() {
                 className="p-7 space-y-4"
               >
                 <div className="text-xs text-slate-400 font-medium mb-1">
-                  Create a{" "}
-                  <span className="text-purple-400 font-bold">
-                    {reg.role === "STUDENT" ? "Student" : "Faculty"}
-                  </span>{" "}
-                  account. Admin profiles cannot be self-registered.
+                  Create a <span className="text-purple-400 font-bold">Faculty</span> account. Student and Admin accounts cannot be self-registered.
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
-                      Account Type
+                    <label className="flex items-center gap-1 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
+                      <Hash className="w-3.5 h-3.5 text-purple-400" />
+                      Faculty ID
                     </label>
-                    <CustomSelect
-                      value={reg.role}
-                      onChange={(val) => setReg({ ...reg, role: val })}
-                      options={[
-                        { value: "FACULTY", label: "Faculty" },
-                        { value: "STUDENT", label: "Student" },
-                      ]}
+                    <input
+                      type="text"
+                      value={reg.faculty_id}
+                      onChange={(e) => setReg({ ...reg, faculty_id: e.target.value })}
+                      placeholder="FAC2025001"
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white text-sm placeholder-slate-500 font-medium transition"
+                      required
                     />
                   </div>
-                  {reg.role === "STUDENT" ? (
-                    <div>
-                      <label className="flex items-center gap-1 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
-                        <Hash className="w-3.5 h-3.5 text-purple-400" />
-                        Student ID
-                      </label>
-                      <input
-                        type="text"
-                        value={reg.student_id}
-                        onChange={(e) => setReg({ ...reg, student_id: e.target.value })}
-                        placeholder="STU2025001"
-                        className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white text-sm placeholder-slate-500 font-medium transition"
-                        required
-                      />
-                    </div>
-                  ) : (
-                    <div>
-                      <label className="flex items-center gap-1 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
-                        <Hash className="w-3.5 h-3.5 text-purple-400" />
-                        Faculty ID
-                      </label>
-                      <input
-                        type="text"
-                        value={reg.faculty_id}
-                        onChange={(e) => setReg({ ...reg, faculty_id: e.target.value })}
-                        placeholder="FAC2025001"
-                        className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white text-sm placeholder-slate-500 font-medium transition"
-                        required
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="flex items-center gap-1.5 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
-                    <User className="w-3.5 h-3.5 text-purple-400" />
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    value={reg.full_name}
-                    onChange={(e) => setReg({ ...reg, full_name: e.target.value })}
-                    placeholder="John Doe"
-                    className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white text-sm placeholder-slate-500 font-medium transition"
-                    required
-                  />
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
+                      <User className="w-3.5 h-3.5 text-purple-400" />
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={reg.full_name}
+                      onChange={(e) => setReg({ ...reg, full_name: e.target.value })}
+                      placeholder="John Doe"
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white text-sm placeholder-slate-500 font-medium transition"
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -374,15 +311,10 @@ export default function Login() {
                       value={reg.username}
                       onChange={(e) => setReg({ ...reg, username: e.target.value })}
                       autoComplete="username"
-                      placeholder={reg.role === "STUDENT" ? "s-username" : "username"}
+                      placeholder="username"
                       className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white text-sm placeholder-slate-500 font-medium transition"
                       required
                     />
-                    {reg.role === "STUDENT" && (
-                      <span className="text-[9px] font-bold text-purple-400 mt-1 block">
-                        Must start with 's-' (e.g. s-john)
-                      </span>
-                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-1 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
@@ -398,23 +330,6 @@ export default function Login() {
                     />
                   </div>
                 </div>
-
-                {reg.role === "STUDENT" && (
-                  <div>
-                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
-                      <Calendar className="w-3.5 h-3.5 text-purple-400" />
-                      Batch
-                    </label>
-                    <input
-                      type="text"
-                      value={reg.batch}
-                      onChange={(e) => setReg({ ...reg, batch: e.target.value })}
-                      placeholder="e.g. 2025"
-                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white text-sm placeholder-slate-500 font-medium transition"
-                      required
-                    />
-                  </div>
-                )}
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -435,7 +350,7 @@ export default function Login() {
                   <div>
                     <label className="flex items-center gap-1.5 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
                       <Lock className="w-3.5 h-3.5 text-purple-400" />
-                      Confirm
+                      Confirm Password
                     </label>
                     <input
                       type="password"
