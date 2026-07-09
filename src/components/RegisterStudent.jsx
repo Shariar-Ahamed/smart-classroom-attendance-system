@@ -105,6 +105,7 @@ export default function RegisterStudent({ onDone }) {
     name: "",
     department: "Computer Science & Engineering",
     batch: "2025",
+    section: "A",
   });
   const [descriptors, setDescriptors] = useState([]);
   const [status, setStatus] = useState("");
@@ -225,6 +226,7 @@ export default function RegisterStudent({ onDone }) {
         name: form.name.trim(),
         department: form.department.trim(),
         batch: form.batch.trim(),
+        section: form.section.trim().toUpperCase(),
         face_encoding: avg,
       });
       setMsg("🎉 Student successfully registered to MongoDB database!", "ok");
@@ -419,7 +421,7 @@ export default function RegisterStudent({ onDone }) {
             placeholder="e.g. John Doe"
           />
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
                 Department
@@ -437,6 +439,17 @@ export default function RegisterStudent({ onDone }) {
               onChange={(v) => setForm({ ...form, batch: v })}
               placeholder="2025"
             />
+
+            <div>
+              <label className="block text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
+                Section
+              </label>
+              <CustomSelect
+                value={form.section}
+                onChange={(val) => setForm({ ...form, section: val })}
+                options={Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i))}
+              />
+            </div>
           </div>
 
           {/* Guided scan poses checklists */}

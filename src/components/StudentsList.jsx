@@ -87,6 +87,7 @@ export default function StudentsList() {
     (s) =>
       s.student_id.toLowerCase().includes(q.toLowerCase()) ||
       s.name.toLowerCase().includes(q.toLowerCase()) ||
+      (s.section && s.section.toLowerCase() === q.trim().toLowerCase()) ||
       s.department.toLowerCase().includes(q.toLowerCase()),
   );
 
@@ -160,6 +161,7 @@ export default function StudentsList() {
                 <th className="py-2 px-3">Name</th>
                 <th className="py-2 px-3">Department</th>
                 <th className="py-2 px-3">Batch</th>
+                <th className="py-2 px-3">Section</th>
                 <th className="py-2 px-3">Face Enrolled</th>
                 <th className="py-2 px-3">Registered</th>
                 {user?.role === "ADMIN" && <th className="py-2 px-3"></th>}
@@ -182,6 +184,7 @@ export default function StudentsList() {
                   </td>
                   <td className="py-2.5 px-3 text-slate-300">{s.department}</td>
                   <td className="py-2.5 px-3 text-slate-300">{s.batch}</td>
+                  <td className="py-2.5 px-3 text-slate-200 font-bold">{s.section || "A"}</td>
                   <td className="py-2.5 px-3">
                     {s.face_encoding && s.face_encoding.length > 0 ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
