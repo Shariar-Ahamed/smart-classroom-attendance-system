@@ -190,7 +190,7 @@ export default function RegisterStudent({ onDone }) {
         <div className="relative aspect-video bg-slate-950 rounded-xl overflow-hidden border border-slate-800/60 shadow-inner group">
           <video
             ref={videoRef}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover -scale-x-100"
             playsInline
             muted
           />
