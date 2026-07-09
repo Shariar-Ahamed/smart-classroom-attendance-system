@@ -288,20 +288,20 @@ export default function Dashboard() {
 function KpiCard({ label, value, icon: Icon, tone, desc }) {
   const tones = {
     indigo: {
-      bg: "from-indigo-500/10 via-indigo-500/5 to-transparent border-indigo-500/20 hover:border-indigo-500/40",
-      icon: "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20",
+      bg: "from-indigo-500/15 via-indigo-500/5 to-slate-900 border-indigo-500/30 hover:border-indigo-500/60 shadow-[0_0_20px_rgba(99,102,241,0.15)] hover:shadow-[0_0_30px_rgba(99,102,241,0.35)]",
+      icon: "bg-indigo-500/15 text-indigo-400 border border-indigo-500/30",
     },
     emerald: {
-      bg: "from-emerald-500/10 via-emerald-500/5 to-transparent border-emerald-500/20 hover:border-emerald-500/40",
-      icon: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+      bg: "from-emerald-500/15 via-emerald-500/5 to-slate-900 border-emerald-500/30 hover:border-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:shadow-[0_0_30px_rgba(16,185,129,0.35)]",
+      icon: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30",
     },
     rose: {
-      bg: "from-rose-500/10 via-rose-500/5 to-transparent border-rose-500/20 hover:border-rose-500/40",
-      icon: "bg-rose-500/10 text-rose-400 border border-rose-500/20",
+      bg: "from-rose-500/15 via-rose-500/5 to-slate-900 border-rose-500/30 hover:border-rose-500/60 shadow-[0_0_20px_rgba(244,63,94,0.15)] hover:shadow-[0_0_30px_rgba(244,63,94,0.35)]",
+      icon: "bg-rose-500/15 text-rose-400 border border-rose-500/30",
     },
     fuchsia: {
-      bg: "from-fuchsia-500/10 via-fuchsia-500/5 to-transparent border-fuchsia-500/20 hover:border-fuchsia-500/40",
-      icon: "bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20",
+      bg: "from-fuchsia-500/15 via-fuchsia-500/5 to-slate-900 border-fuchsia-500/30 hover:border-fuchsia-500/60 shadow-[0_0_20px_rgba(217,70,239,0.15)] hover:shadow-[0_0_30px_rgba(217,70,239,0.35)]",
+      icon: "bg-fuchsia-500/15 text-fuchsia-400 border border-fuchsia-500/30",
     },
   };
 
@@ -314,7 +314,7 @@ function KpiCard({ label, value, icon: Icon, tone, desc }) {
     <motion.div
       variants={cardVariants}
       whileHover={{ y: -3, scale: 1.01 }}
-      className={`relative overflow-hidden bg-gradient-to-br ${tones[tone].bg} border rounded-2xl p-5 shadow-md hover:shadow-lg transition-all duration-300 group cursor-pointer`}
+      className={`relative overflow-hidden bg-gradient-to-br ${tones[tone].bg} border rounded-2xl p-5 transition-all duration-300 group cursor-pointer`}
     >
       <div className="flex items-start justify-between">
         <div>

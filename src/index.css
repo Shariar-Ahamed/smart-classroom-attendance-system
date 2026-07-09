@@ -44,8 +44,34 @@ input[type="reset"] {
 
 /* Reusable Glassmorphism Panel */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(30, 41, 59, 0.65) !important; /* Lighter slate-800 glass base for high contrast */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15) !important; /* Brighter border */
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Global Card & Page Contrast Enhancements */
+.bg-slate-950 {
+  background-color: #030712 !important; /* Deep black-blue page background */
+}
+
+.bg-slate-900, 
+.bg-slate-900\/70,
+.bg-slate-900\/60 {
+  background-color: #0f172a !important; /* Deep slate-900 card background */
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+}
+
+.bg-slate-800\/50,
+.bg-slate-800\/70,
+.bg-slate-800\/30,
+.bg-slate-900\/35 {
+  background-color: #1e293b !important; /* Slate-800 for sub-cards and list items */
+}
+
+.border-slate-800,
+.border-slate-800\/80,
+.border-slate-800\/60 {
+  border-color: #334155 !important; /* Higher contrast border (slate-700) for sharp separation */
 }
