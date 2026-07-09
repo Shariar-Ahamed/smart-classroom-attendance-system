@@ -30,6 +30,7 @@ from auth import (
     register_student_user,
     require_auth,
     seed_default_users,
+    hash_password,
 )
 from face_service import (
     average_encodings,
@@ -182,19 +183,75 @@ def register_student():
             return jsonify({"error": "No faces detected in provided images"}), 422
         avg = average_encodings(encodings)
 
+    student_id = data["student_id"].strip().upper()
+    name = data["name"].strip()
+    department = data["department"].strip()
+    batch = data["batch"].strip()
+
     doc = {
-        "student_id": data["student_id"].strip(),
-        "name": data["name"].strip(),
-        "department": data["department"].strip(),
-        "batch": data["batch"].strip(),
+        "student_id": student_id,
+        "name": name,
+        "department": department,
+        "batch": batch,
         "face_encoding": avg,
         "created_at": datetime.utcnow(),
     }
+    
+    # 1. Insert into students_col
     try:
         students_col.insert_one(doc)
     except Exception as e:
         return jsonify({"error": str(e)}), 409
-    return jsonify({"ok": True, "student_id": doc["student_id"]}), 201
+
+    # 2. Automatically generate username and password for the student
+    import re
+    import random
+    import string
+
+    # Base username: s- + first word of name lowercased, alphanumeric. Fallback to student_id.
+    first_word = name.split(" ")[0].lower()
+    first_word_clean = re.sub(r"[^a-z0-9]", "", first_word)
+    
+    if not first_word_clean:
+        student_id_clean = re.sub(r"[^a-z0-9]", "", student_id.lower())
+        base_username = f"s-{student_id_clean}"
+    else:
+        base_username = f"s-{first_word_clean}"
+
+    candidate_username = base_username
+    counter = 1
+    while users_col.find_one({"username": candidate_username}):
+        candidate_username = f"{base_username}{counter}"
+        counter += 1
+    username = candidate_username
+
+    # Generate a random 8-character password
+    chars = string.ascii_letters + string.digits
+    generated_password = "".join(random.choice(chars) for _ in range(8))
+
+    # Insert student user into users_col
+    try:
+        users_col.insert_one({
+            "username": username,
+            "password": hash_password(generated_password),
+            "plain_password": generated_password,
+            "role": "STUDENT",
+            "full_name": name,
+            "department": department,
+            "student_id": student_id,
+            "created_at": datetime.utcnow()
+        })
+    except Exception as e:
+        # If user creation fails, delete student profile to allow re-trying
+        students_col.delete_one({"student_id": student_id})
+        return jsonify({"error": f"Failed to create user account: {str(e)}"}), 500
+
+    return jsonify({
+        "ok": True, 
+        "student_id": student_id,
+        "username": username,
+        "password": generated_password
+    }), 201
 
 
 @app.route("/api/students", methods=["GET"])
@@ -208,6 +265,15 @@ def list_students():
     for s in students:
         if isinstance(s.get("created_at"), datetime):
             s["created_at"] = s["created_at"].isoformat()
+        
+        # Look up username from users_col using student_id
+        user_doc = users_col.find_one({"student_id": s["student_id"]})
+        if user_doc:
+            s["username"] = user_doc["username"]
+            s["plain_password"] = user_doc.get("plain_password", "Encrypted/Hashed")
+        else:
+            s["username"] = None
+            s["plain_password"] = None
     return jsonify(students)
 
 
@@ -219,6 +285,81 @@ def delete_student(student_id):
     if res.deleted_count == 0:
         return jsonify({"error": "Student not found"}), 404
     return jsonify({"ok": True})
+
+
+@app.route("/api/students/<student_id>/reset-password", methods=["POST"])
+@require_auth("ADMIN")
+def reset_student_password(student_id):
+    student_id = student_id.strip().upper()
+    student = students_col.find_one({"student_id": student_id})
+    if not student:
+        return jsonify({"error": "Student profile not found"}), 404
+
+    data = request.get_json(force=True) or {}
+    custom_password = data.get("password", "").strip()
+
+    import random
+    import string
+    import re
+
+    # 1. Generate or retrieve username
+    user_doc = users_col.find_one({"student_id": student_id})
+    if user_doc:
+        username = user_doc["username"]
+    else:
+        # Generate new unique username starting with "s-"
+        name = student["name"].strip()
+        first_word = name.split(" ")[0].lower()
+        first_word_clean = re.sub(r"[^a-z0-9]", "", first_word)
+        if not first_word_clean:
+            student_id_clean = re.sub(r"[^a-z0-9]", "", student_id.lower())
+            base_username = f"s-{student_id_clean}"
+        else:
+            base_username = f"s-{first_word_clean}"
+
+        candidate_username = base_username
+        counter = 1
+        while users_col.find_one({"username": candidate_username}):
+            candidate_username = f"{base_username}{counter}"
+            counter += 1
+        username = candidate_username
+
+    # 2. Determine password
+    if custom_password:
+        password_to_save = custom_password
+    else:
+        # Generate random 8-character password
+        chars = string.ascii_letters + string.digits
+        password_to_save = "".join(random.choice(chars) for _ in range(8))
+
+    # 3. Create or Update user account
+    hashed = hash_password(password_to_save)
+    if user_doc:
+        users_col.update_one(
+            {"student_id": student_id},
+            {"$set": {
+                "password": hashed,
+                "plain_password": password_to_save,
+                "username": username
+            }}
+        )
+    else:
+        users_col.insert_one({
+            "username": username,
+            "password": hashed,
+            "plain_password": password_to_save,
+            "role": "STUDENT",
+            "full_name": student["name"],
+            "department": student["department"],
+            "student_id": student_id,
+            "created_at": datetime.utcnow()
+        })
+
+    return jsonify({
+        "ok": True,
+        "username": username,
+        "password": password_to_save
+    })
 
 
 @app.route("/api/students/profile", methods=["GET"])

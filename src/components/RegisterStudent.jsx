@@ -70,6 +70,7 @@ export default function RegisterStudent({ onDone }) {
   const [busy, setBusy] = useState(false);
   const [modelReady, setModelReady] = useState(isFaceModelLoaded());
   const [modelLoading, setModelLoading] = useState(false);
+  const [createdCredentials, setCreatedCredentials] = useState(null);
 
   const step = descriptors.length; // 0..POSES.length
   const currentPose = POSES[Math.min(step, POSES.length - 1)];
@@ -149,7 +150,7 @@ export default function RegisterStudent({ onDone }) {
     setBusy(true);
     try {
       const avg = averageDescriptors(descriptors);
-      await api.registerStudentFace({
+      const res = await api.registerStudent({
         student_id: form.student_id.trim().toUpperCase(),
         name: form.name.trim(),
         department: form.department.trim(),
@@ -157,9 +158,13 @@ export default function RegisterStudent({ onDone }) {
         face_encoding: avg,
       });
       setMsg("🎉 Student successfully registered to MongoDB database!", "ok");
-      setTimeout(() => {
-        if (onDone) onDone();
-      }, 1500);
+      if (res && res.username && res.password) {
+        setCreatedCredentials({ username: res.username, password: res.password });
+      } else {
+        setTimeout(() => {
+          if (onDone) onDone();
+        }, 1500);
+      }
     } catch (err) {
       setMsg(err.message || "Failed to register student.", "err");
     } finally {
@@ -445,6 +450,54 @@ export default function RegisterStudent({ onDone }) {
           </motion.button>
         </div>
       </div>
+
+      {/* Credentials overlay modal */}
+      {createdCredentials && (
+        <div className="absolute inset-0 bg-slate-950/95 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center text-center p-8 z-30 border border-slate-800/80 shadow-2xl">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="w-full max-w-sm bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4 shadow-xl text-slate-100"
+          >
+            <div className="flex flex-col items-center gap-2 mb-2">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                <CheckCircle2 className="w-6 h-6 animate-pulse" />
+              </div>
+              <h4 className="font-bold text-white text-lg tracking-wide">Student Account Created!</h4>
+              <p className="text-xs text-slate-400 max-w-xs">
+                A student login account was auto-generated. Please share these credentials with the student:
+              </p>
+            </div>
+            
+            <div className="space-y-3 bg-slate-950/80 border border-slate-800/80 p-4 rounded-xl text-left font-semibold">
+              <div>
+                <span className="text-[10px] uppercase font-extrabold text-slate-500 tracking-wider block">Username</span>
+                <span className="text-sm font-mono font-bold text-indigo-300">{createdCredentials.username}</span>
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-extrabold text-slate-500 tracking-wider block">Temporary Password</span>
+                <span className="text-sm font-mono font-bold text-purple-300">{createdCredentials.password}</span>
+              </div>
+            </div>
+
+            <p className="text-[10px] text-slate-500 text-center font-medium italic">
+              Students can use these credentials to log in and view their attendance records in read-only mode.
+            </p>
+
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={() => {
+                setCreatedCredentials(null);
+                reset();
+                if (onDone) onDone();
+              }}
+              className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-xl font-bold shadow-lg shadow-purple-500/25 transition duration-300 flex items-center justify-center gap-1.5 cursor-pointer text-sm"
+            >
+              <span>Close & View list</span>
+            </motion.button>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

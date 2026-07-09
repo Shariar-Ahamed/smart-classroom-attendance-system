@@ -82,6 +82,13 @@ export const api = {
     });
   },
 
+  async resetStudentPassword(student_id, newPassword = "") {
+    return await makeRequest(`/api/students/${student_id}/reset-password`, {
+      method: "POST",
+      body: { password: newPassword },
+    });
+  },
+
   // POST /api/mark-attendance (called by the live capture loop)
   async markAttendance(student_id, course_id) {
     try {
