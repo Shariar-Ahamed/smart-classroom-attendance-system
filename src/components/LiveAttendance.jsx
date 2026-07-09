@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import CustomSelect from "./CustomSelect";
 import { useWebcam } from "../hooks/useWebcam";
 import {
   isFaceModelLoaded,
@@ -230,21 +231,18 @@ export default function LiveAttendance() {
               Select a course and activate scanner to start automated attendance.
             </p>
           </div>
-          
-          <div className="flex items-center gap-2 bg-slate-950/40 border border-slate-800 px-3 py-1.5 rounded-xl">
+          <div className="flex items-center gap-3">
             <span className="text-xs font-semibold text-slate-400">Course:</span>
-            <select
+            <CustomSelect
               value={course}
-              onChange={(e) => setCourse(e.target.value)}
+              onChange={setCourse}
               disabled={running}
-              className="bg-transparent text-sm font-semibold text-indigo-300 focus:outline-none cursor-pointer"
-            >
-              {courses.map((c) => (
-                <option key={c.course_id} value={c.course_id} className="bg-slate-950 text-slate-200">
-                  {c.course_id} ({c.name})
-                </option>
-              ))}
-            </select>
+              className="min-w-[240px]"
+              options={courses.map((c) => ({
+                value: c.course_id,
+                label: `${c.course_id} (${c.name})`,
+              }))}
+            />
           </div>
         </div>
 

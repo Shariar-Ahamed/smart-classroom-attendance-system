@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import CustomSelect from "./CustomSelect";
 import { useWebcam } from "../hooks/useWebcam";
 import { api } from "../services/api";
 import {
@@ -422,16 +423,16 @@ export default function RegisterStudent({ onDone }) {
               <label className="block text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
                 Department
               </label>
-              <select
+              <CustomSelect
                 value={form.department}
-                onChange={(e) => setForm({ ...form, department: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-200 text-sm font-semibold cursor-pointer"
-              >
-                <option value="Computer Science">Computer Science</option>
-                <option value="Electrical Engineering">Electrical Engineering</option>
-                <option value="Business Administration">Business Administration</option>
-                <option value="Swe">SWE</option>
-              </select>
+                onChange={(val) => setForm({ ...form, department: val })}
+                options={[
+                  "Computer Science",
+                  "Electrical Engineering",
+                  "Business Administration",
+                  "SWE",
+                ]}
+              />
             </div>
 
             <Field

@@ -18,7 +18,8 @@ const ALL_ITEMS = [
   { id: "live", label: "Live Attendance", icon: Video, faculty: true },
   { id: "manual", label: "Manual Attendance", icon: Edit3, faculty: true },
   { id: "register", label: "Register Student", icon: UserPlus, admin: true },
-  { id: "courses", label: "Courses & Faculty", icon: BookOpen, admin: true },
+  { id: "courses", label: "Courses", icon: BookOpen, admin: true },
+  { id: "faculties", label: "Faculties", icon: GraduationCap, admin: true },
   { id: "students", label: "Students", icon: Users },
   { id: "records", label: "Records", icon: FolderOpen },
 ];

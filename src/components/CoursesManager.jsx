@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import CustomSelect from "./CustomSelect";
 import { api } from "../services/api";
 
 export default function CoursesManager() {
@@ -144,18 +145,18 @@ export default function CoursesManager() {
             </div>
             <div>
               <label className="block text-xs text-slate-400 mb-1.5 font-medium">Assigned Faculty (Instructor)</label>
-              <select
+              <CustomSelect
                 value={facultyUsername}
-                onChange={(e) => setFacultyUsername(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="">-- Not Assigned --</option>
-                {faculties.map((f) => (
-                  <option key={f.username} value={f.username}>
-                    {f.full_name} ({f.username})
-                  </option>
-                ))}
-              </select>
+                onChange={setFacultyUsername}
+                placeholder="-- Not Assigned --"
+                options={[
+                  { value: "", label: "-- Not Assigned --" },
+                  ...faculties.map((f) => ({
+                    value: f.username,
+                    label: `${f.full_name} (${f.username})`,
+                  })),
+                ]}
+              />
             </div>
             <button
               type="submit"

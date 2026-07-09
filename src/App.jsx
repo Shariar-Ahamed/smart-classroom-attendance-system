@@ -10,6 +10,7 @@ import AttendanceRecords from "./components/AttendanceRecords";
 import ManualAttendance from "./components/ManualAttendance";
 import StudentDashboard from "./components/StudentDashboard";
 import CoursesManager from "./components/CoursesManager";
+import FacultiesManager from "./components/FacultiesManager";
 import Footer from "./components/Footer";
 
 const VIEW_META = {
@@ -38,8 +39,12 @@ const VIEW_META = {
     subtitle: "",
   },
   courses: {
-    title: "Courses & Faculty",
+    title: "Courses",
     subtitle: "",
+  },
+  faculties: {
+    title: "Faculties",
+    subtitle: "Manage faculty login accounts",
   },
 };
 
@@ -56,7 +61,7 @@ function Shell() {
   // RBAC view-gating:
   //  - ADMIN cannot access Live or Manual attendance (faculty-only workflows)
   //  - FACULTY cannot access Register Student (admin-only workflow)
-  const isAdminOnly = view === "register" || view === "courses";
+  const isAdminOnly = view === "register" || view === "courses" || view === "faculties";
   const isFacultyOnly = view === "live" || view === "manual";
   const blocked =
     (isAdminOnly && user.role !== "ADMIN") ||
@@ -93,6 +98,7 @@ function Shell() {
           {safeView === "students" && <StudentsList />}
           {safeView === "records" && <AttendanceRecords />}
           {safeView === "courses" && user.role === "ADMIN" && <CoursesManager />}
+          {safeView === "faculties" && user.role === "ADMIN" && <FacultiesManager />}
         </div>
         <Footer />
       </main>

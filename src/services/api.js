@@ -156,6 +156,19 @@ export const api = {
     return await makeRequest("/api/faculties");
   },
 
+  async resetFacultyPassword(username, newPassword = "") {
+    return await makeRequest(`/api/faculties/${username}/reset-password`, {
+      method: "POST",
+      body: { password: newPassword },
+    });
+  },
+
+  async removeFaculty(username) {
+    return await makeRequest(`/api/faculties/${username}`, {
+      method: "DELETE",
+    });
+  },
+
   async saveCourse(data) {
     return await makeRequest("/api/courses", {
       method: "POST",

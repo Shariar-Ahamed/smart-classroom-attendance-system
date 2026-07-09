@@ -100,6 +100,7 @@ def register_faculty(
     password: str,
     full_name: str,
     department: str,
+    faculty_id: str,
 ) -> Optional[str]:
     """Self-registration for FACULTY accounts.
 
@@ -110,9 +111,10 @@ def register_faculty(
     username = (username or "").strip()
     full_name = (full_name or "").strip()
     department = (department or "").strip()
+    faculty_id = (faculty_id or "").strip()
 
-    if not username or not password or not full_name:
-        return "Username, full name and password are required."
+    if not username or not password or not full_name or not faculty_id:
+        return "Username, full name, faculty ID and password are required."
     if len(username) < 3:
         return "Username must be at least 3 characters."
     if not re.fullmatch(r"[a-zA-Z0-9._-]+", username):
@@ -126,14 +128,18 @@ def register_faculty(
         return "This username is reserved."
     if users_col.find_one({"username": {"$regex": f"^{re.escape(username)}$", "$options": "i"}}):
         return "This username is already taken."
+    if users_col.find_one({"faculty_id": faculty_id}):
+        return "An account has already been registered for this Faculty ID."
 
     users_col.insert_one(
         {
             "username": username,
             "password": hash_password(password),
+            "plain_password": password,
             "role": "FACULTY",
             "full_name": full_name,
             "department": department,
+            "faculty_id": faculty_id,
             "created_at": datetime.utcnow(),
         }
     )
@@ -191,6 +197,7 @@ def register_student_user(
         {
             "username": username,
             "password": hash_password(password),
+            "plain_password": password,
             "role": "STUDENT",
             "full_name": full_name,
             "department": department,

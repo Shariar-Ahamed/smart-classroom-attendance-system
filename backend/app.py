@@ -140,6 +140,7 @@ def register_user():
             password=data.get("password", ""),
             full_name=data.get("full_name", ""),
             department=data.get("department", ""),
+            faculty_id=data.get("faculty_id", ""),
         )
     if err:
         return jsonify({"error": err}), 400
@@ -284,6 +285,8 @@ def delete_student(student_id):
     res = students_col.delete_one({"student_id": student_id})
     if res.deleted_count == 0:
         return jsonify({"error": "Student not found"}), 404
+    # Also delete associated user account
+    users_col.delete_one({"student_id": student_id})
     return jsonify({"ok": True})
 
 
@@ -360,6 +363,54 @@ def reset_student_password(student_id):
         "username": username,
         "password": password_to_save
     })
+
+
+@app.route("/api/faculties/<username>/reset-password", methods=["POST"])
+@require_auth("ADMIN")
+def reset_faculty_password(username):
+    username = username.strip()
+    user_doc = users_col.find_one({"username": username, "role": "FACULTY"})
+    if not user_doc:
+        return jsonify({"error": "Faculty member not found"}), 404
+
+    data = request.get_json(force=True) or {}
+    custom_password = data.get("password", "").strip()
+
+    import random
+    import string
+
+    if custom_password:
+        password_to_save = custom_password
+    else:
+        # Generate random 8-character password
+        chars = string.ascii_letters + string.digits
+        password_to_save = "".join(random.choice(chars) for _ in range(8))
+
+    hashed = hash_password(password_to_save)
+    users_col.update_one(
+        {"username": username, "role": "FACULTY"},
+        {"$set": {
+            "password": hashed,
+            "plain_password": password_to_save
+        }}
+    )
+
+    return jsonify({
+        "ok": True,
+        "username": username,
+        "password": password_to_save
+    })
+
+
+@app.route("/api/faculties/<username>", methods=["DELETE"])
+@require_auth("ADMIN")
+def delete_faculty(username):
+    """Delete a faculty user account from MongoDB."""
+    username = username.strip()
+    res = users_col.delete_one({"username": username, "role": "FACULTY"})
+    if res.deleted_count == 0:
+        return jsonify({"error": "Faculty member not found"}), 404
+    return jsonify({"ok": True})
 
 
 @app.route("/api/students/profile", methods=["GET"])

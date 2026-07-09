@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import CustomSelect from "./CustomSelect";
 import { api } from "../services/api";
 
 /**
@@ -92,17 +93,15 @@ export default function ManualAttendance() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <select
+            <CustomSelect
               value={course}
-              onChange={(e) => setCourse(e.target.value)}
-              className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              {courses.map((c) => (
-                <option key={c.course_id} value={c.course_id}>
-                  {c.course_id} — {c.name}
-                </option>
-              ))}
-            </select>
+              onChange={setCourse}
+              className="min-w-[240px]"
+              options={courses.map((c) => ({
+                value: c.course_id,
+                label: `${c.course_id} — ${c.name}`,
+              }))}
+            />
             <input
               type="date"
               value={date}

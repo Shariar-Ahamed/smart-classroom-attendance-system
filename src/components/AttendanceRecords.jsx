@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import CustomSelect from "./CustomSelect";
 import { api } from "../services/api";
 
 export default function AttendanceRecords() {
@@ -76,27 +77,27 @@ export default function AttendanceRecords() {
               onChange={(e) => setDate(e.target.value)}
               className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
-            <select
+            <CustomSelect
               value={course}
-              onChange={(e) => setCourse(e.target.value)}
-              className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="">All courses</option>
-              {courses.map((c) => (
-                <option key={c.course_id} value={c.course_id}>
-                  {c.course_id}
-                </option>
-              ))}
-            </select>
-            <select
+              onChange={setCourse}
+              placeholder="All courses"
+              className="min-w-[150px]"
+              options={[
+                { value: "", label: "All courses" },
+                ...courses.map((c) => ({ value: c.course_id, label: c.course_id })),
+              ]}
+            />
+            <CustomSelect
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="all">All status</option>
-              <option value="Present">Present</option>
-              <option value="Absent">Absent</option>
-            </select>
+              onChange={setStatusFilter}
+              placeholder="All status"
+              className="min-w-[130px]"
+              options={[
+                { value: "all", label: "All status" },
+                { value: "Present", label: "Present" },
+                { value: "Absent", label: "Absent" },
+              ]}
+            />
             <button
               onClick={() => {
                 setDate("");

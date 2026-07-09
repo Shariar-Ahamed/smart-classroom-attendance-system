@@ -1,4 +1,5 @@
 import { useState } from "react";
+import CustomSelect from "./CustomSelect";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,6 +32,7 @@ export default function Login() {
     department: "Computer Science",
     batch: "2025",
     student_id: "",
+    faculty_id: "",
     role: "FACULTY", // FACULTY or STUDENT
     password: "",
     confirm: "",
@@ -77,6 +79,11 @@ export default function Login() {
         setError("Student ID is required.");
         return;
       }
+    } else {
+      if (!reg.faculty_id.trim()) {
+        setError("Faculty ID is required.");
+        return;
+      }
     }
     setLoading(true);
     try {
@@ -95,6 +102,7 @@ export default function Login() {
           password: reg.password,
           full_name: reg.full_name.trim(),
           department: reg.department.trim(),
+          faculty_id: reg.faculty_id.trim(),
         });
       }
       setInfo(
@@ -108,6 +116,7 @@ export default function Login() {
         department: reg.department,
         batch: reg.batch,
         student_id: "",
+        faculty_id: "",
         role: "FACULTY",
         password: "",
         confirm: "",
@@ -298,14 +307,14 @@ export default function Login() {
                     <label className="block text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
                       Account Type
                     </label>
-                    <select
+                    <CustomSelect
                       value={reg.role}
-                      onChange={(e) => setReg({ ...reg, role: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white text-sm font-semibold cursor-pointer"
-                    >
-                      <option value="FACULTY">Faculty</option>
-                      <option value="STUDENT">Student</option>
-                    </select>
+                      onChange={(val) => setReg({ ...reg, role: val })}
+                      options={[
+                        { value: "FACULTY", label: "Faculty" },
+                        { value: "STUDENT", label: "Student" },
+                      ]}
+                    />
                   </div>
                   {reg.role === "STUDENT" ? (
                     <div>
@@ -324,12 +333,18 @@ export default function Login() {
                     </div>
                   ) : (
                     <div>
-                      <label className="block text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
-                        Enrollment
+                      <label className="flex items-center gap-1 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
+                        <Hash className="w-3.5 h-3.5 text-purple-400" />
+                        Faculty ID
                       </label>
-                      <div className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 text-sm select-none font-semibold">
-                        Self-Enrollment
-                      </div>
+                      <input
+                        type="text"
+                        value={reg.faculty_id}
+                        onChange={(e) => setReg({ ...reg, faculty_id: e.target.value })}
+                        placeholder="FAC2025001"
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white text-sm placeholder-slate-500 font-medium transition"
+                        required
+                      />
                     </div>
                   )}
                 </div>
