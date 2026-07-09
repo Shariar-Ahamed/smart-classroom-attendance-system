@@ -2,7 +2,19 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
 import { motion, AnimatePresence } from "framer-motion";
-import { GraduationCap, User, Lock, ArrowLeft, Sparkles, Building, Hash, Calendar, CheckCircle } from "lucide-react";
+import {
+  GraduationCap,
+  User,
+  Lock,
+  ArrowLeft,
+  Sparkles,
+  Building,
+  Hash,
+  Calendar,
+  CheckCircle,
+  Database,
+  Code
+} from "lucide-react";
 
 export default function Login() {
   const { login } = useAuth();
@@ -109,27 +121,27 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 text-slate-100 overflow-hidden relative">
-      {/* Decorative Animated Glows */}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 text-slate-100 overflow-hidden relative select-none">
+      {/* Decorative Interactive Floating Glows */}
       <motion.div
         animate={{
           scale: [1, 1.2, 1],
           opacity: [0.15, 0.25, 0.15],
-          x: [0, 20, 0],
-          y: [0, -20, 0],
+          x: [0, 30, 0],
+          y: [0, -30, 0],
         }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-20 left-10 w-72 h-72 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-10 left-10 w-80 h-80 bg-indigo-500/20 rounded-full blur-[80px] pointer-events-none"
       />
       <motion.div
         animate={{
           scale: [1.2, 1, 1.2],
           opacity: [0.1, 0.2, 0.1],
-          x: [0, -30, 0],
-          y: [0, 30, 0],
+          x: [0, -40, 0],
+          y: [0, 40, 0],
         }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-10 right-10 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-3xl pointer-events-none"
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute bottom-10 right-10 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-[100px] pointer-events-none"
       />
 
       <div className="relative w-full max-w-md">
@@ -139,15 +151,15 @@ export default function Login() {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 100 }}
-            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 shadow-lg shadow-indigo-500/20 mb-4"
+            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 shadow-lg shadow-indigo-500/30 mb-4 border border-indigo-400/20"
           >
-            <GraduationCap className="w-8 h-8 text-white" />
+            <GraduationCap className="w-8 h-8 text-white animate-pulse" />
           </motion.div>
           <motion.h1
             initial={{ y: -10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1 }}
-            className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-200 via-slate-100 to-fuchsia-200"
+            className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-200 via-white to-fuchsia-200"
           >
             SmartAttend AI
           </motion.h1>
@@ -155,19 +167,22 @@ export default function Login() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-slate-400 text-sm mt-1.5 flex items-center justify-center gap-1.5"
+            className="text-slate-400 text-sm mt-1.5 flex items-center justify-center gap-1.5 font-medium"
           >
             <Sparkles className="w-4 h-4 text-indigo-400 animate-pulse" />
             AI-Powered Classroom Attendance
           </motion.p>
         </div>
 
-        {/* Form Container (Glassmorphic & Animated height/layout) */}
+        {/* Form Container (Opaque Glassmorphic Card for Max Separation) */}
         <motion.div
           layout
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="glass-panel rounded-2xl shadow-2xl overflow-hidden border border-slate-800/80"
+          className="bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-slate-800 shadow-indigo-500/5 relative"
         >
+          {/* Top glowing edge line */}
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-indigo-500" />
+
           <AnimatePresence mode="wait">
             {mode === "signin" ? (
               <motion.form
@@ -177,10 +192,10 @@ export default function Login() {
                 exit={{ x: 80, opacity: 0 }}
                 transition={{ duration: 0.25, ease: "easeInOut" }}
                 onSubmit={submitLogin}
-                className="p-6 space-y-4"
+                className="p-7 space-y-5"
               >
                 <div>
-                  <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
+                  <label className="flex items-center gap-1.5 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
                     <User className="w-3.5 h-3.5 text-indigo-400" />
                     Username
                   </label>
@@ -188,14 +203,14 @@ export default function Login() {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Username"
+                    placeholder="Enter your username"
                     autoComplete="username"
-                    className="w-full px-4 py-2.5 bg-slate-950/55 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-100 placeholder-slate-600 transition"
+                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white placeholder-slate-500 font-medium transition"
                     required
                   />
                 </div>
                 <div>
-                  <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
+                  <label className="flex items-center gap-1.5 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
                     <Lock className="w-3.5 h-3.5 text-indigo-400" />
                     Password
                   </label>
@@ -203,9 +218,9 @@ export default function Login() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
+                    placeholder="Enter your password"
                     autoComplete="current-password"
-                    className="w-full px-4 py-2.5 bg-slate-950/55 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-100 placeholder-slate-600 transition"
+                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white placeholder-slate-500 font-medium transition"
                     required
                   />
                 </div>
@@ -214,9 +229,9 @@ export default function Login() {
                   <motion.div
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-sm bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 rounded-lg px-3 py-2 flex items-center gap-2"
+                    className="text-xs bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 rounded-xl px-3.5 py-2.5 flex items-center gap-2 font-medium"
                   >
-                    <CheckCircle className="w-4 h-4 shrink-0" />
+                    <CheckCircle className="w-4 h-4 shrink-0 text-emerald-400" />
                     <span>{info}</span>
                   </motion.div>
                 )}
@@ -224,18 +239,20 @@ export default function Login() {
                   <motion.div
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-sm bg-red-500/10 text-red-300 border border-red-500/20 rounded-lg px-3 py-2"
+                    className="text-xs bg-red-500/10 text-red-300 border border-red-500/20 rounded-xl px-3.5 py-2.5 flex items-center gap-2 font-medium"
                   >
-                    {error}
+                    <CheckCircle className="w-4 h-4 shrink-0 text-red-400 rotate-180" />
+                    <span>{error}</span>
                   </motion.div>
                 )}
 
                 <div className="flex flex-col gap-3 pt-2">
                   <motion.button
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
                     type="submit"
                     disabled={loading}
-                    className="w-full py-2.5 bg-gradient-to-r from-indigo-500 to-fuchsia-500 hover:from-indigo-400 hover:to-fuchsia-400 rounded-lg font-semibold shadow-lg shadow-indigo-500/20 disabled:opacity-50 transition duration-300 text-white"
+                    className="w-full py-2.5 bg-gradient-to-r from-indigo-500 to-fuchsia-500 hover:from-indigo-400 hover:to-fuchsia-400 rounded-xl font-bold shadow-lg shadow-indigo-500/20 disabled:opacity-50 transition duration-300 text-white flex items-center justify-center cursor-pointer"
                   >
                     {loading ? (
                       <span className="flex items-center justify-center gap-2">
@@ -248,12 +265,13 @@ export default function Login() {
                   </motion.button>
 
                   <motion.button
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
                     type="button"
                     onClick={() => switchMode("register")}
-                    className="w-full py-2.5 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 hover:border-slate-600 rounded-lg font-semibold text-slate-300 transition duration-300"
+                    className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold text-slate-300 transition duration-300 cursor-pointer"
                   >
-                    Register
+                    Register / Create Account
                   </motion.button>
                 </div>
               </motion.form>
@@ -265,25 +283,25 @@ export default function Login() {
                 exit={{ x: -80, opacity: 0 }}
                 transition={{ duration: 0.25, ease: "easeInOut" }}
                 onSubmit={submitRegister}
-                className="p-6 space-y-3"
+                className="p-7 space-y-4"
               >
-                <div className="text-xs text-slate-400 mb-2">
+                <div className="text-xs text-slate-400 font-medium mb-1">
                   Create a{" "}
-                  <span className="text-fuchsia-400 font-semibold">
+                  <span className="text-fuchsia-400 font-bold">
                     {reg.role === "STUDENT" ? "Student" : "Faculty"}
                   </span>{" "}
-                  account. Admin accounts cannot be self-registered.
+                  account. Admin profiles cannot be self-registered.
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
+                    <label className="block text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
                       Account Type
                     </label>
                     <select
                       value={reg.role}
                       onChange={(e) => setReg({ ...reg, role: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-950/55 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-slate-100 text-sm"
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-white text-sm font-semibold cursor-pointer"
                     >
                       <option value="FACULTY">Faculty</option>
                       <option value="STUDENT">Student</option>
@@ -291,7 +309,7 @@ export default function Login() {
                   </div>
                   {reg.role === "STUDENT" ? (
                     <div>
-                      <label className="flex items-center gap-1 text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
+                      <label className="flex items-center gap-1 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
                         <Hash className="w-3.5 h-3.5 text-fuchsia-400" />
                         Student ID
                       </label>
@@ -299,17 +317,17 @@ export default function Login() {
                         type="text"
                         value={reg.student_id}
                         onChange={(e) => setReg({ ...reg, student_id: e.target.value })}
-                        placeholder="e.g. STU2025001"
-                        className="w-full px-3 py-2 bg-slate-950/55 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-slate-100 text-sm placeholder-slate-600"
+                        placeholder="STU2025001"
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-white text-sm placeholder-slate-500 font-medium transition"
                         required
                       />
                     </div>
                   ) : (
                     <div>
-                      <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
+                      <label className="block text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
                         Enrollment
                       </label>
-                      <div className="w-full px-3 py-2 bg-slate-900/30 border border-slate-800/50 rounded-lg text-slate-400 text-sm select-none">
+                      <div className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 text-sm select-none font-semibold">
                         Self-Enrollment
                       </div>
                     </div>
@@ -317,7 +335,7 @@ export default function Login() {
                 </div>
 
                 <div>
-                  <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
+                  <label className="flex items-center gap-1.5 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
                     <User className="w-3.5 h-3.5 text-fuchsia-400" />
                     Full Name
                   </label>
@@ -325,14 +343,15 @@ export default function Login() {
                     type="text"
                     value={reg.full_name}
                     onChange={(e) => setReg({ ...reg, full_name: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-950/55 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-slate-100 text-sm"
+                    placeholder="John Doe"
+                    className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-white text-sm placeholder-slate-500 font-medium transition"
                     required
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
+                    <label className="block text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
                       Username
                     </label>
                     <input
@@ -340,17 +359,18 @@ export default function Login() {
                       value={reg.username}
                       onChange={(e) => setReg({ ...reg, username: e.target.value })}
                       autoComplete="username"
-                      className="w-full px-3 py-2 bg-slate-950/55 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-slate-100 text-sm"
+                      placeholder={reg.role === "STUDENT" ? "s-username" : "username"}
+                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-white text-sm placeholder-slate-500 font-medium transition"
                       required
                     />
                     {reg.role === "STUDENT" && (
-                      <span className="text-[9px] text-fuchsia-400 mt-1 block">
+                      <span className="text-[9px] font-bold text-fuchsia-400 mt-1 block">
                         Must start with 's-' (e.g. s-john)
                       </span>
                     )}
                   </div>
                   <div>
-                    <label className="flex items-center gap-1 text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
+                    <label className="flex items-center gap-1 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
                       <Building className="w-3.5 h-3.5 text-fuchsia-400" />
                       Department
                     </label>
@@ -358,7 +378,7 @@ export default function Login() {
                       type="text"
                       value={reg.department}
                       onChange={(e) => setReg({ ...reg, department: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-950/55 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-slate-100 text-sm"
+                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-white text-sm font-medium transition"
                       required
                     />
                   </div>
@@ -366,7 +386,7 @@ export default function Login() {
 
                 {reg.role === "STUDENT" && (
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
                       <Calendar className="w-3.5 h-3.5 text-fuchsia-400" />
                       Batch
                     </label>
@@ -375,58 +395,63 @@ export default function Login() {
                       value={reg.batch}
                       onChange={(e) => setReg({ ...reg, batch: e.target.value })}
                       placeholder="e.g. 2025"
-                      className="w-full px-3 py-2 bg-slate-950/55 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-slate-100 text-sm"
+                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-white text-sm placeholder-slate-500 font-medium transition"
                       required
                     />
                   </div>
                 )}
 
-                <div>
-                  <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
-                    <Lock className="w-3.5 h-3.5 text-fuchsia-400" />
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    value={reg.password}
-                    onChange={(e) => setReg({ ...reg, password: e.target.value })}
-                    autoComplete="new-password"
-                    className="w-full px-3 py-2 bg-slate-950/55 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-slate-100 text-sm"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
-                    <Lock className="w-3.5 h-3.5 text-fuchsia-400" />
-                    Confirm Password
-                  </label>
-                  <input
-                    type="password"
-                    value={reg.confirm}
-                    onChange={(e) => setReg({ ...reg, confirm: e.target.value })}
-                    autoComplete="new-password"
-                    className="w-full px-3 py-2 bg-slate-950/55 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-slate-100 text-sm"
-                    required
-                  />
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
+                      <Lock className="w-3.5 h-3.5 text-fuchsia-400" />
+                      Password
+                    </label>
+                    <input
+                      type="password"
+                      value={reg.password}
+                      onChange={(e) => setReg({ ...reg, password: e.target.value })}
+                      autoComplete="new-password"
+                      placeholder="••••••••"
+                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-white text-sm placeholder-slate-500 font-medium transition"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
+                      <Lock className="w-3.5 h-3.5 text-fuchsia-400" />
+                      Confirm
+                    </label>
+                    <input
+                      type="password"
+                      value={reg.confirm}
+                      onChange={(e) => setReg({ ...reg, confirm: e.target.value })}
+                      autoComplete="new-password"
+                      placeholder="••••••••"
+                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-white text-sm placeholder-slate-500 font-medium transition"
+                      required
+                    />
+                  </div>
                 </div>
 
                 {error && (
                   <motion.div
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-sm bg-red-500/10 text-red-300 border border-red-500/20 rounded-lg px-3 py-2"
+                    className="text-xs bg-red-500/10 text-red-300 border border-red-500/20 rounded-xl px-3.5 py-2.5 flex items-center gap-2 font-medium"
                   >
-                    {error}
+                    <CheckCircle className="w-4 h-4 shrink-0 text-red-400 rotate-180" />
+                    <span>{error}</span>
                   </motion.div>
                 )}
 
                 <div className="pt-2">
                   <motion.button
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
                     type="submit"
                     disabled={loading}
-                    className="w-full py-2.5 bg-gradient-to-r from-fuchsia-500 to-pink-500 hover:from-fuchsia-400 hover:to-pink-400 rounded-lg font-semibold shadow-lg shadow-fuchsia-500/20 disabled:opacity-50 transition duration-300 text-white"
+                    className="w-full py-2.5 bg-gradient-to-r from-fuchsia-500 to-pink-500 hover:from-fuchsia-400 hover:to-pink-400 rounded-xl font-bold shadow-lg shadow-fuchsia-500/20 disabled:opacity-50 transition duration-300 text-white flex items-center justify-center cursor-pointer"
                   >
                     {loading ? (
                       <span className="flex items-center justify-center gap-2">
@@ -443,9 +468,9 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() => switchMode("signin")}
-                    className="text-xs text-slate-400 hover:text-slate-200 transition duration-300 flex items-center justify-center gap-1 mx-auto"
+                    className="text-xs font-semibold text-slate-400 hover:text-slate-200 transition duration-300 flex items-center justify-center gap-1.5 mx-auto cursor-pointer"
                   >
-                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <ArrowLeft className="w-4 h-4 text-slate-500" />
                     Back to sign in
                   </button>
                 </div>
@@ -454,9 +479,22 @@ export default function Login() {
           </AnimatePresence>
         </motion.div>
 
-        <p className="text-center text-xs text-slate-600 mt-6 tracking-wide select-none">
-          React · Flask · MongoDB · OpenCV · face_recognition
-        </p>
+        {/* Tech Stack Indicator footer */}
+        <div className="flex items-center justify-center gap-3 text-[10px] text-slate-600 mt-6 select-none font-bold font-mono tracking-wider">
+          <span className="flex items-center gap-1 hover:text-slate-400 transition">
+            <Code className="w-3.5 h-3.5 text-indigo-500" />
+            React + Flask
+          </span>
+          <span className="text-slate-800">·</span>
+          <span className="flex items-center gap-1 hover:text-slate-400 transition">
+            <Database className="w-3.5 h-3.5 text-fuchsia-500" />
+            MongoDB
+          </span>
+          <span className="text-slate-800">·</span>
+          <span className="flex items-center gap-1 hover:text-slate-400 transition">
+            OpenCV & Dlib
+          </span>
+        </div>
       </div>
     </div>
   );
