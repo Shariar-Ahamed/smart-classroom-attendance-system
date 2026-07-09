@@ -1,30 +1,4 @@
-<p align="center">
-  <img src="assets/readme-cover.png" alt="SmartAttend AI Cover Page" width="100%" style="border-radius: 12px; margin-bottom: 20px;">
-</p>
-
 # 🏫 SmartAttend AI - Smart Classroom Attendance System
-
-<p align="center">
-  <a href="https://github.com/mdfrsojib/smart-auto-attendance-system-using_DL_model/releases"><img src="https://img.shields.io/badge/Release-v1.0.0-ff007f?style=for-the-badge&logo=github&logoColor=white" alt="Latest Release"></a>
-  <a href="https://github.com/mdfrsojib/smart-auto-attendance-system-using_DL_model"><img src="https://img.shields.io/badge/Framework-React%20%7C%20Flask-blue?style=for-the-badge&logo=react&logoColor=white" alt="Framework Stack"></a>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Database-MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white">
-  <img src="https://img.shields.io/badge/Computer--Vision-OpenCV%20%2F%20face__recognition-brightgreen?style=flat-square&logo=opencv&logoColor=white">
-  <img src="https://img.shields.io/badge/Security-JWT%20%2F%20RBAC-violet?style=flat-square">
-  <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square">
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/github/repo-size/mdfrsojib/smart-auto-attendance-system-using_DL_model">
-  <img src="https://img.shields.io/github/last-commit/mdfrsojib/smart-auto-attendance-system-using_DL_model">
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/github/stars/mdfrsojib/smart-auto-attendance-system-using_DL_model?style=social">
-  <img src="https://img.shields.io/github/forks/mdfrsojib/smart-auto-attendance-system-using_DL_model?style=social">
-</p>
 
 ---
 
@@ -128,8 +102,8 @@ smart-classroom-attendance-system/
 
 ### 1️⃣ Clone the Repository
 ```bash
-git clone https://github.com/mdfrsojib/smart-auto-attendance-system-using_DL_model.git
-cd smart-auto-attendance-system-using_DL_model
+git clone <repository-url>
+cd smart-classroom-attendance-system
 ```
 
 ### 2️⃣ Backend Configuration
@@ -155,7 +129,7 @@ JWT_SECRET=your-secret-key-change-me
 CAMERA_SOURCE=0  # Use 0 for webcam, or use RTSP stream link
 ```
 
-Run the backend server (starts on `http://localhost:5000`):
+Run the backend server (starts on port 5000):
 ```bash
 python app.py
 ```
@@ -170,7 +144,7 @@ cd ..
 # Install frontend dependencies
 npm install
 
-# Run the development server (starts on http://localhost:5173)
+# Run the development server (starts on port 5173)
 npm run dev
 ```
 
