@@ -75,25 +75,21 @@ function getPoseFromLandmarks(landmarks) {
   // Yaw: distance from nose tip to left eye outer vs right eye outer
   const leftDist = noseTip.x - leftEyeOuter.x;
   const rightDist = rightEyeOuter.x - noseTip.x;
-  const yawRatio = leftDist / rightDist;
+  const yawRatioLeft = leftDist / rightDist;
+  const yawRatioRight = rightDist / leftDist;
   
   // Pitch: vertical nose bridge height vs nose-to-mouth height
   const upperNoseHeight = noseTip.y - eyeCenterY;
   const lowerNoseToMouth = mouthCenterY - noseTip.y;
   const pitchRatio = upperNoseHeight / lowerNoseToMouth;
 
-  // Since the camera is mirrored:
-  // If the user turns their head to their LEFT, in the mirrored view their face looks to the left,
-  // which means the noseTip.x is closer to leftEyeOuter.x. Thus, leftDist is small, yawRatio is small.
-  // If the user turns their head to their RIGHT, in the mirrored view their face looks to the right,
-  // which means the noseTip.x is closer to rightEyeOuter.x. Thus, rightDist is small, yawRatio is large.
-  if (yawRatio < 0.6) {
-    return "left";
-  } else if (yawRatio > 1.6) {
+  if (yawRatioLeft < 0.7) {
     return "right";
-  } else if (pitchRatio < 0.75) {
+  } else if (yawRatioRight < 0.7) {
+    return "left";
+  } else if (pitchRatio < 0.8) {
     return "up";
-  } else if (pitchRatio > 1.6) {
+  } else if (pitchRatio > 1.45) {
     return "down";
   }
   
