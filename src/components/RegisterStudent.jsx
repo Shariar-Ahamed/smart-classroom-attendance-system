@@ -349,7 +349,7 @@ export default function RegisterStudent({ onDone }) {
         <div className="space-y-4">
           <div>
             <h2 className="font-semibold text-slate-100">Student Details</h2>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-400 mt-1">
               Associate captured facial prints with official student database records.
             </p>
           </div>
@@ -395,20 +395,20 @@ export default function RegisterStudent({ onDone }) {
                     key={i}
                     className={`flex items-center gap-3 text-xs px-3 py-2 rounded-xl border transition-all duration-300 ${
                       completed
-                        ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-300"
+                        ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-300 font-medium"
                         : active
-                          ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-200"
-                          : "bg-slate-900/30 border-slate-800/60 text-slate-600"
+                          ? "bg-indigo-500/15 border-indigo-500/30 text-indigo-200 font-bold shadow-[0_0_12px_rgba(99,102,241,0.15)]"
+                          : "bg-slate-900/60 border-slate-800/80 text-slate-400 font-medium"
                     }`}
                   >
-                    <span className="w-5 h-5 rounded-full flex items-center justify-center bg-slate-950/50 shrink-0 font-bold">
+                    <span className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 font-bold ${active ? "bg-indigo-500/20 text-indigo-300" : "bg-slate-950/50"}`}>
                       {completed ? "✓" : active ? "▶" : "○"}
                     </span>
                     <span className="text-sm shrink-0 select-none">{p.emoji}</span>
                     <div className="min-w-0 flex-1">
-                      <div className={`font-medium ${active ? "text-indigo-300" : ""}`}>{p.label}</div>
+                      <div className={active ? "text-indigo-300 font-bold" : ""}>{p.label}</div>
                       {active && (
-                        <div className="text-[10px] text-slate-400 mt-0.5">{p.hint}</div>
+                        <div className="text-[10px] text-slate-300 mt-0.5">{p.hint}</div>
                       )}
                     </div>
                   </div>
@@ -469,7 +469,7 @@ function DirectionArrow({ arrow }) {
 function Field({ label, value, onChange, placeholder }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
+      <label className="block text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
         {label}
       </label>
       <input
@@ -477,7 +477,7 @@ function Field({ label, value, onChange, placeholder }) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-3.5 py-2 bg-slate-950/50 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-100 text-sm placeholder-slate-700 transition"
+        className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white text-sm placeholder-slate-400 transition"
       />
     </div>
   );
