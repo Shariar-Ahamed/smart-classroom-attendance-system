@@ -1,1 +1,10 @@
 @import "tailwindcss";
+
+button,
+[role="button"],
+select,
+input[type="button"],
+input[type="submit"],
+input[type="reset"] {
+  cursor: pointer !important;
+}

@@ -13,8 +13,7 @@
 
 import * as faceapi from "@vladmandic/face-api";
 
-const MODEL_URL =
-  "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model";
+const MODEL_URL = "/models";
 
 // --------- model loading (lazy, singleton) ---------
 
