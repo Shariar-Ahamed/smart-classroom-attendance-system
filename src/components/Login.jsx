@@ -1,5 +1,6 @@
 import { useState } from "react";
 import CustomSelect from "./CustomSelect";
+import { DEPARTMENTS } from "../constants/departments";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
 import { motion, AnimatePresence } from "framer-motion";
@@ -29,7 +30,7 @@ export default function Login() {
   const [reg, setReg] = useState({
     full_name: "",
     username: "",
-    department: "Computer Science",
+    department: "Computer Science & Engineering",
     faculty_id: "",
     password: "",
     confirm: "",
@@ -321,12 +322,10 @@ export default function Login() {
                       <Building className="w-3.5 h-3.5 text-purple-400" />
                       Department
                     </label>
-                    <input
-                      type="text"
+                    <CustomSelect
                       value={reg.department}
-                      onChange={(e) => setReg({ ...reg, department: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white text-sm font-medium transition"
-                      required
+                      onChange={(val) => setReg({ ...reg, department: val })}
+                      options={DEPARTMENTS}
                     />
                   </div>
                 </div>

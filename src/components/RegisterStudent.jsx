@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import CustomSelect from "./CustomSelect";
+import { DEPARTMENTS } from "../constants/departments";
 import { useWebcam } from "../hooks/useWebcam";
 import { api } from "../services/api";
 import {
@@ -102,7 +103,7 @@ export default function RegisterStudent({ onDone }) {
   const [form, setForm] = useState({
     student_id: "",
     name: "",
-    department: "Computer Science",
+    department: "Computer Science & Engineering",
     batch: "2025",
   });
   const [descriptors, setDescriptors] = useState([]);
@@ -426,12 +427,7 @@ export default function RegisterStudent({ onDone }) {
               <CustomSelect
                 value={form.department}
                 onChange={(val) => setForm({ ...form, department: val })}
-                options={[
-                  "Computer Science",
-                  "Electrical Engineering",
-                  "Business Administration",
-                  "SWE",
-                ]}
+                options={DEPARTMENTS}
               />
             </div>
 
