@@ -107,6 +107,7 @@ export async function detectSingleFace(video) {
     },
     descriptor: Array.from(r.descriptor),
     score: r.detection.score,
+    landmarks: r.landmarks.positions,
   };
 }
 
