@@ -34,7 +34,7 @@ export default function LiveAttendance() {
   const { videoRef, ready, error: webcamError, start, stop } = useWebcam();
   const [students, setStudents] = useState([]);
   const [courses, setCourses] = useState([]);
-  const [course, setCourse] = useState("CS101");
+  const [course, setCourse] = useState("");
   const [running, setRunning] = useState(false);
   const [events, setEvents] = useState([]);
   const [todayCount, setTodayCount] = useState(0);
@@ -46,14 +46,28 @@ export default function LiveAttendance() {
   const loopRef = useRef(null);
   const inFlightRef = useRef(false);
 
-  // Load enrolled + courses once
+  // Load courses once
   useEffect(() => {
     (async () => {
-      setStudents(await api.listStudents());
-      setCourses(await api.listCourses());
+      const cList = await api.listCourses();
+      setCourses(cList);
+      if (cList.length > 0) {
+        setCourse(cList[0].course_id);
+      }
       refreshToday();
     })();
   }, []);
+
+  // Reload student list for selected course
+  useEffect(() => {
+    if (!course) {
+      setStudents([]);
+      return;
+    }
+    (async () => {
+      setStudents(await api.listStudents(course));
+    })();
+  }, [course]);
 
   // Eagerly load the face model so it's ready when Start is clicked
   useEffect(() => {

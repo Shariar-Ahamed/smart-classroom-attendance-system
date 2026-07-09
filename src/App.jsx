@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { Menu } from "lucide-react";
 import Login from "./components/Login";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./components/Dashboard";
@@ -51,6 +52,7 @@ const VIEW_META = {
 function Shell() {
   const { user } = useAuth();
   const [view, setView] = useState("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (!user) return <Login />;
 
@@ -71,22 +73,40 @@ function Shell() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex">
-      <Sidebar view={safeView} setView={setView} />
+      <Sidebar
+        view={safeView}
+        setView={setView}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
       <main className="flex-1 min-w-0 flex flex-col min-h-screen">
-        <header className="px-8 py-5 border-b border-slate-800 bg-slate-900/40 backdrop-blur sticky top-0 z-10">
+        <header className="px-6 py-4 lg:px-8 lg:py-5 border-b border-slate-800 bg-slate-900/40 backdrop-blur sticky top-0 z-10">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-semibold text-slate-100">
-                {meta.title}
-              </h1>
-              <p className="text-xs text-slate-500 mt-0.5">{meta.subtitle}</p>
+            <div className="flex items-center gap-3">
+              {/* Hamburger menu on mobile */}
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden p-2 hover:bg-slate-850 text-slate-400 hover:text-slate-200 rounded-xl transition cursor-pointer"
+              >
+                <Menu className="w-5.5 h-5.5" />
+              </button>
+              <div>
+                <h1 className="text-base lg:text-xl font-semibold text-slate-100 leading-tight">
+                  {meta.title}
+                </h1>
+                {meta.subtitle && (
+                  <p className="text-[10px] lg:text-xs text-slate-500 mt-0.5 max-sm:hidden">
+                    {meta.subtitle}
+                  </p>
+                )}
+              </div>
             </div>
-            <div className="text-xs text-slate-500 font-mono">
+            <div className="text-[10px] lg:text-xs text-slate-500 font-mono max-sm:hidden">
               {new Date().toLocaleString()}
             </div>
           </div>
         </header>
-        <div className="p-6 lg:p-8 flex-1">
+        <div className="p-4 lg:p-8 flex-1">
           {safeView === "dashboard" && <Dashboard />}
           {safeView === "live" && user.role === "FACULTY" && <LiveAttendance />}
           {safeView === "manual" && user.role === "FACULTY" && (

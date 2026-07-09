@@ -22,7 +22,7 @@ from typing import List
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from db import students_col, courses_col, users_col
+from db import students_col, courses_col, users_col, faculty_assignments_col, student_registrations_col
 from auth import (
     authenticate,
     make_token,
@@ -265,10 +265,19 @@ def register_student():
 @require_auth("ADMIN", "FACULTY")
 def list_students():
     include_enc = request.args.get("include_encodings", "false").lower() == "true"
+    course_id = request.args.get("course_id", "").strip()
+    
     projection = {"_id": 0}
     if not include_enc:
         projection["face_encoding"] = 0
-    students = list(students_col.find({}, projection))
+
+    query = {}
+    if course_id:
+        regs = list(student_registrations_col.find({"course_ids": course_id}))
+        registered_student_ids = [r["student_id"] for r in regs]
+        query["student_id"] = {"$in": registered_student_ids}
+
+    students = list(students_col.find(query, projection))
     for s in students:
         if isinstance(s.get("created_at"), datetime):
             s["created_at"] = s["created_at"].isoformat()
@@ -571,20 +580,72 @@ def get_faculties():
 
 
 DEFAULT_COURSES = [
-    { "course_id": "CS101", "name": "Intro to Computer Science", "total_classes": 20, "faculty_username": "", "faculty_name": "" },
-    { "course_id": "CS210", "name": "Data Structures", "total_classes": 20, "faculty_username": "", "faculty_name": "" },
-    { "course_id": "CS305", "name": "Operating Systems", "total_classes": 20, "faculty_username": "", "faculty_name": "" },
-    { "course_id": "AI401", "name": "Artificial Intelligence", "total_classes": 20, "faculty_username": "", "faculty_name": "" },
+    { "course_id": "CS101", "name": "Intro to Computer Science", "total_classes": 20, "department": "Computer Science & Engineering" },
+    { "course_id": "CS210", "name": "Data Structures", "total_classes": 20, "department": "Computer Science & Engineering" },
+    { "course_id": "CS305", "name": "Operating Systems", "total_classes": 20, "department": "Computer Science & Engineering" },
+    { "course_id": "AI401", "name": "Artificial Intelligence", "total_classes": 20, "department": "Computer Science & Engineering" },
 ]
 
 @app.route("/api/courses", methods=["GET"])
 @require_auth("ADMIN", "FACULTY", "STUDENT")
 def get_courses():
-    courses = list(courses_col.find({}, {"_id": 0}))
-    if not courses:
-        courses_col.insert_many(DEFAULT_COURSES)
-        courses = list(courses_col.find({}, {"_id": 0}))
-    return jsonify(courses)
+    user = request.user
+    role = user.get("role")
+    username = user.get("sub")
+    dept_filter = request.args.get("department", "").strip()
+
+    if role == "ADMIN":
+        courses_col.update_many({"department": {"$exists": False}}, {"$set": {"department": "Computer Science & Engineering"}})
+        query = {}
+        if dept_filter:
+            query["department"] = dept_filter
+        courses = list(courses_col.find(query, {"_id": 0}))
+        if not courses and not dept_filter:
+            courses_col.insert_many(DEFAULT_COURSES)
+            courses = list(courses_col.find({}, {"_id": 0}))
+        return jsonify(courses)
+
+    elif role == "FACULTY":
+        assignments = list(faculty_assignments_col.find({"username": username}, {"_id": 0}))
+        assigned_course_ids = []
+        for ass in assignments:
+            assigned_course_ids.extend(ass.get("course_ids", []))
+        assigned_course_ids = list(set(assigned_course_ids))
+        courses = list(courses_col.find({"course_id": {"$in": assigned_course_ids}}, {"_id": 0}))
+        return jsonify(courses)
+
+    elif role == "STUDENT":
+        student_id = user.get("student_id")
+        if not student_id:
+            u_doc = users_col.find_one({"username": username})
+            if u_doc:
+                student_id = u_doc.get("student_id")
+        
+        if not student_id:
+            return jsonify([]), 200
+
+        registrations = list(student_registrations_col.find({"student_id": student_id}, {"_id": 0}))
+        registered_course_ids = []
+        for reg in registrations:
+            registered_course_ids.extend(reg.get("course_ids", []))
+        registered_course_ids = list(set(registered_course_ids))
+        courses = list(courses_col.find({"course_id": {"$in": registered_course_ids}}, {"_id": 0}))
+        
+        # Populate faculty_name for the student's courses
+        for c in courses:
+            c_id = c["course_id"]
+            fac_assign = faculty_assignments_col.find_one({"course_ids": c_id})
+            if fac_assign:
+                fac_user = users_col.find_one({"username": fac_assign["username"], "role": "FACULTY"})
+                if fac_user:
+                    c["faculty_name"] = fac_user.get("full_name", "")
+                else:
+                    c["faculty_name"] = fac_assign["username"]
+            else:
+                c["faculty_name"] = "Unassigned"
+        return jsonify(courses)
+
+    return jsonify([]), 200
 
 
 @app.route("/api/courses", methods=["POST"])
@@ -593,20 +654,14 @@ def save_course():
     data = request.get_json(force=True) or {}
     course_id = data.get("course_id", "").strip()
     name = data.get("name", "").strip()
+    department = data.get("department", "").strip()
     try:
         total_classes = int(data.get("total_classes", 20))
     except ValueError:
         total_classes = 20
-    faculty_username = data.get("faculty_username", "").strip()
 
-    if not course_id or not name:
-        return jsonify({"error": "Course ID and Course Name are required."}), 400
-
-    faculty_name = ""
-    if faculty_username:
-        fac_doc = users_col.find_one({"username": faculty_username, "role": "FACULTY"})
-        if fac_doc:
-            faculty_name = fac_doc.get("full_name", "")
+    if not course_id or not name or not department:
+        return jsonify({"error": "Course ID, Name, and Department are required."}), 400
 
     courses_col.update_one(
         {"course_id": course_id},
@@ -614,9 +669,8 @@ def save_course():
             "$set": {
                 "course_id": course_id,
                 "name": name,
+                "department": department,
                 "total_classes": total_classes,
-                "faculty_username": faculty_username,
-                "faculty_name": faculty_name,
             }
         },
         upsert=True
@@ -631,6 +685,81 @@ def delete_course(course_id):
     if res.deleted_count == 0:
         return jsonify({"error": "Course not found"}), 404
     return jsonify({"ok": True})
+
+
+@app.route("/api/assignments/faculty", methods=["GET"])
+@require_auth("ADMIN")
+def get_faculty_assignments():
+    assignments = list(faculty_assignments_col.find({}, {"_id": 0}))
+    return jsonify(assignments)
+
+
+@app.route("/api/assignments/faculty", methods=["POST"])
+@require_auth("ADMIN")
+def save_faculty_assignment():
+    data = request.get_json(force=True) or {}
+    username = data.get("username", "").strip()
+    department = data.get("department", "").strip()
+    course_ids = data.get("course_ids", [])
+
+    if not username or not department:
+        return jsonify({"error": "Faculty username and Department are required."}), 400
+
+    faculty_assignments_col.update_one(
+        {"username": username, "department": department},
+        {
+            "$set": {
+                "username": username,
+                "department": department,
+                "course_ids": course_ids
+            }
+        },
+        upsert=True
+    )
+    return jsonify({"ok": True}), 200
+
+
+@app.route("/api/assignments/student", methods=["GET"])
+@require_auth("ADMIN")
+def get_student_registrations():
+    student_id = request.args.get("student_id", "").strip().upper()
+    semester = request.args.get("semester", "").strip()
+    
+    query = {}
+    if student_id:
+        query["student_id"] = student_id
+    if semester:
+        query["semester"] = semester
+        
+    regs = list(student_registrations_col.find(query, {"_id": 0}))
+    return jsonify(regs)
+
+
+@app.route("/api/assignments/student", methods=["POST"])
+@require_auth("ADMIN")
+def save_student_registration():
+    data = request.get_json(force=True) or {}
+    student_id = data.get("student_id", "").strip().upper()
+    department = data.get("department", "").strip()
+    semester = data.get("semester", "").strip()
+    course_ids = data.get("course_ids", [])
+
+    if not student_id or not department or not semester:
+        return jsonify({"error": "Student ID, Department, and Semester are required."}), 400
+
+    student_registrations_col.update_one(
+        {"student_id": student_id, "semester": semester},
+        {
+            "$set": {
+                "student_id": student_id,
+                "department": department,
+                "semester": semester,
+                "course_ids": course_ids
+            }
+        },
+        upsert=True
+    )
+    return jsonify({"ok": True}), 200
 
 
 @app.route("/api/health", methods=["GET"])

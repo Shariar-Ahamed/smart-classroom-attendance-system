@@ -72,8 +72,11 @@ export const api = {
     });
   },
 
-  async listStudents() {
-    return await makeRequest("/api/students?include_encodings=true");
+  async listStudents(courseId = "") {
+    const params = new URLSearchParams();
+    params.append("include_encodings", "true");
+    if (courseId) params.append("course_id", courseId);
+    return await makeRequest(`/api/students?${params.toString()}`);
   },
 
   async removeStudent(student_id) {
@@ -148,8 +151,9 @@ export const api = {
     return await makeRequest(`/api/students/profile${query}`);
   },
 
-  async listCourses() {
-    return await makeRequest("/api/courses");
+  async listCourses(department = "") {
+    const query = department ? `?department=${encodeURIComponent(department)}` : "";
+    return await makeRequest(`/api/courses${query}`);
   },
 
   async listFaculties() {
@@ -179,6 +183,32 @@ export const api = {
   async removeCourse(course_id) {
     return await makeRequest(`/api/courses/${course_id}`, {
       method: "DELETE",
+    });
+  },
+
+  async getFacultyAssignments() {
+    return await makeRequest("/api/assignments/faculty");
+  },
+
+  async saveFacultyAssignment(data) {
+    return await makeRequest("/api/assignments/faculty", {
+      method: "POST",
+      body: data,
+    });
+  },
+
+  async getStudentRegistrations(filters = {}) {
+    const params = new URLSearchParams();
+    if (filters.student_id) params.append("student_id", filters.student_id);
+    if (filters.semester) params.append("semester", filters.semester);
+    const query = params.toString() ? `?${params.toString()}` : "";
+    return await makeRequest(`/api/assignments/student${query}`);
+  },
+
+  async saveStudentRegistration(data) {
+    return await makeRequest("/api/assignments/student", {
+      method: "POST",
+      body: data,
     });
   },
 };

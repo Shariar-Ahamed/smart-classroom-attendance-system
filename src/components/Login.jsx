@@ -160,7 +160,7 @@ export default function Login() {
         <motion.div
           layout
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-slate-800 shadow-indigo-500/5 relative"
+          className="bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-800 shadow-indigo-500/5 relative"
         >
           {/* Top glowing edge line */}
           <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500" />
@@ -174,7 +174,7 @@ export default function Login() {
                 exit={{ x: 80, opacity: 0 }}
                 transition={{ duration: 0.25, ease: "easeInOut" }}
                 onSubmit={submitLogin}
-                className="p-7 space-y-5"
+                className="p-5 sm:p-7 space-y-5"
               >
                 <div>
                   <label className="flex items-center gap-1.5 text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
@@ -265,7 +265,7 @@ export default function Login() {
                 exit={{ x: -80, opacity: 0 }}
                 transition={{ duration: 0.25, ease: "easeInOut" }}
                 onSubmit={submitRegister}
-                className="p-7 space-y-4"
+                className="p-5 sm:p-7 space-y-4"
               >
                 <div className="text-xs text-slate-400 font-medium mb-1">
                   Create a <span className="text-purple-400 font-bold">Faculty</span> account. Student and Admin accounts cannot be self-registered.

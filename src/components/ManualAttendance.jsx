@@ -24,7 +24,12 @@ export default function ManualAttendance() {
   const [confirmMarkAllStatus, setConfirmMarkAllStatus] = useState(null);
 
   const load = async () => {
-    setStudents(await api.listStudents());
+    if (!course) {
+      setStudents([]);
+      setRecords([]);
+      return;
+    }
+    setStudents(await api.listStudents(course));
     setRecords(await api.getAttendance({ date, course_id: course }));
   };
 

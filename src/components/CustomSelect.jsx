@@ -9,6 +9,7 @@ export default function CustomSelect({
   placeholder = "Select option",
   className = "",
   disabled = false,
+  searchable = false,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -82,8 +83,8 @@ export default function CustomSelect({
             className="absolute z-50 w-full mt-1.5 bg-slate-900/95 border border-slate-800/80 backdrop-blur-md rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
           >
             {/* Search Input Box inside Dropdown */}
-            {normalizedOptions.length > 7 && (
-              <div className="p-2 border-b border-slate-800/80 bg-slate-950/40 sticky top-0 z-10 flex items-center gap-1.5">
+            {(searchable || normalizedOptions.length > 7) && (
+              <div className="p-2 border-b border-slate-800/80 bg-slate-900 sticky top-0 z-10 flex items-center gap-1.5">
                 <Search className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                 <input
                   type="text"
