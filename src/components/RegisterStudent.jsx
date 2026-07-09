@@ -7,11 +7,22 @@ import {
   isFaceModelLoaded,
   loadFaceModel,
 } from "../services/faceModel";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Camera,
+  CameraOff,
+  UserCheck,
+  RotateCcw,
+  Undo2,
+  AlertCircle,
+  CheckCircle2,
+  Smile,
+  ShieldAlert,
+  ArrowRight,
+  Info
+} from "lucide-react";
 
 // ---- Guided pose sequence ----
-// Each capture asks the student to face the camera from a slightly
-// different angle. Averaging descriptors from multiple poses produces a
-// much more robust enrollment than 5 frontal shots.
 const POSES = [
   {
     label: "Look straight at the camera",
@@ -46,7 +57,7 @@ const POSES = [
 ];
 
 export default function RegisterStudent({ onDone }) {
-  const { videoRef, ready, error, start, stop } = useWebcam();
+  const { videoRef, ready, error: webcamError, start, stop } = useWebcam();
   const [form, setForm] = useState({
     student_id: "",
     name: "",
@@ -108,102 +119,70 @@ export default function RegisterStudent({ onDone }) {
           "ok",
         );
       }
+    } catch (err) {
+      setMsg("Error running face detection.", "err");
     } finally {
       setBusy(false);
     }
   };
 
   const undoLast = () => {
+    if (descriptors.length === 0) return;
     setDescriptors((d) => d.slice(0, -1));
-    setMsg("Removed last sample.", "info");
+    setMsg(`Undone. Now capture: ${POSES[descriptors.length - 1].label}.`, "info");
   };
 
   const reset = () => {
     setDescriptors([]);
-    setMsg("", "info");
+    setMsg("Scan reset. Position your face in the oval to start.", "info");
   };
 
   const submit = async () => {
     if (!form.student_id.trim() || !form.name.trim()) {
-      setMsg("Student ID and Name are required.", "err");
+      setMsg("Fill in Student ID and Full Name first.", "err");
       return;
     }
-    if (!done) {
-      setMsg(`Capture ${POSES.length - step} more pose(s).`, "err");
+    if (descriptors.length < POSES.length) {
+      setMsg("Capture all 5 face angles first.", "err");
       return;
     }
     setBusy(true);
     try {
-      const encoding = averageDescriptors(descriptors);
-      await api.registerStudent({
-        student_id: form.student_id.trim(),
+      const avg = averageDescriptors(descriptors);
+      await api.registerStudentFace({
+        student_id: form.student_id.trim().toUpperCase(),
         name: form.name.trim(),
         department: form.department.trim(),
         batch: form.batch.trim(),
-        face_encoding: encoding,
+        face_encoding: avg,
       });
-      setMsg(`✅ ${form.name} registered successfully.`, "ok");
-      setForm({
-        student_id: "",
-        name: "",
-        department: form.department,
-        batch: form.batch,
-      });
-      setDescriptors([]);
-      stop();
-      onDone?.();
-    } catch (e) {
-      setMsg(`❌ ${e.message}`, "err");
+      setMsg("🎉 Student successfully registered to MongoDB database!", "ok");
+      setTimeout(() => {
+        if (onDone) onDone();
+      }, 1500);
+    } catch (err) {
+      setMsg(err.message || "Failed to register student.", "err");
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <div className="grid lg:grid-cols-2 gap-6">
-      {/* Camera panel */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-slate-100">Face Capture</h2>
-          <span className="text-xs text-slate-500">
-            Sample {Math.min(step, POSES.length)}/{POSES.length}
-          </span>
+    <div className="grid lg:grid-cols-2 gap-6 items-start">
+      {/* Camera Panel */}
+      <div className="glass-panel border border-slate-800/80 rounded-2xl p-5 shadow-xl space-y-4">
+        <div>
+          <h2 className="font-semibold text-slate-100 flex items-center gap-2">
+            <Camera className="w-5 h-5 text-indigo-400" />
+            Face Scan Capture
+          </h2>
+          <p className="text-xs text-slate-500 mt-1">
+            Capture 5 diverse facial angles to register a robust face print.
+          </p>
         </div>
 
-        {/* Pose instruction banner */}
-        {ready && !done && (
-          <div className="mb-4 p-4 rounded-xl bg-gradient-to-br from-indigo-500/20 to-fuchsia-500/10 border border-indigo-500/40">
-            <div className="flex items-center gap-3">
-              <div className="text-4xl shrink-0">{currentPose.emoji}</div>
-              <div className="min-w-0">
-                <div className="text-[10px] uppercase tracking-wider text-indigo-300 font-semibold">
-                  Pose {step + 1} of {POSES.length}
-                </div>
-                <div className="text-sm font-semibold text-white mt-0.5">
-                  {currentPose.label}
-                </div>
-                <div className="text-xs text-slate-300 mt-0.5">
-                  {currentPose.hint}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        {ready && done && (
-          <div className="mb-4 p-4 rounded-xl bg-emerald-500/15 border border-emerald-500/40 flex items-center gap-3">
-            <div className="text-3xl">✅</div>
-            <div>
-              <div className="text-sm font-semibold text-emerald-100">
-                All poses captured
-              </div>
-              <div className="text-xs text-emerald-200/80">
-                Fill in the details and click <b>Register Student</b>.
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="relative aspect-video bg-slate-950 rounded-xl overflow-hidden border border-slate-800">
+        {/* Video feed with Oval Guide and Scanning animation */}
+        <div className="relative aspect-video bg-slate-950 rounded-xl overflow-hidden border border-slate-800/60 shadow-inner group">
           <video
             ref={videoRef}
             className="w-full h-full object-cover"
@@ -211,206 +190,260 @@ export default function RegisterStudent({ onDone }) {
             muted
           />
 
+          {/* Camera Off Placeholder */}
           {!ready && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 gap-3">
-              <div className="text-5xl">📷</div>
-              <p className="text-sm">Camera off</p>
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-600 gap-2.5 select-none bg-slate-950/80">
+              <CameraOff className="w-10 h-10 text-slate-700 animate-pulse" />
+              <p className="text-xs font-semibold uppercase tracking-wider">Camera off</p>
             </div>
           )}
 
           {ready && !done && (
             <>
-              {/* face oval guide */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-48 h-60 border-2 border-indigo-400/70 rounded-[50%] shadow-[0_0_30px_rgba(99,102,241,0.5)]" />
+              {/* Futuristic scanning green/blue laser line */}
+              <div className="animate-scan z-10" />
+
+              {/* Face oval guide with glowing animations */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                <div className="w-44 h-56 border-2 border-dashed border-indigo-400/50 rounded-[50%] shadow-[0_0_40px_rgba(99,102,241,0.25)] animate-pulse" />
               </div>
 
               {/* Direction arrow overlay */}
               <DirectionArrow arrow={currentPose.arrow} />
 
-              <div className="absolute top-3 left-3 flex items-center gap-2 text-xs text-emerald-300 bg-emerald-500/20 px-2 py-1 rounded-full border border-emerald-500/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <div className="absolute top-3 left-3 flex items-center gap-2 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 z-10">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
                 LIVE
               </div>
+
               {modelReady ? (
-                <div className="absolute top-3 right-3 text-[10px] text-indigo-200 bg-indigo-500/20 px-2 py-1 rounded-full border border-indigo-500/40">
+                <div className="absolute top-3 right-3 text-[10px] font-bold text-indigo-300 bg-indigo-500/15 px-2.5 py-0.5 rounded-full border border-indigo-500/20 z-10">
                   AI ready
                 </div>
               ) : (
-                <div className="absolute top-3 right-3 text-[10px] text-amber-200 bg-amber-500/20 px-2 py-1 rounded-full border border-amber-500/40 animate-pulse">
+                <div className="absolute top-3 right-3 text-[10px] font-bold text-amber-300 bg-amber-500/15 px-2.5 py-0.5 rounded-full border border-amber-500/20 animate-pulse z-10">
                   loading AI…
                 </div>
               )}
             </>
           )}
+
+          {/* Overlay when complete */}
+          {ready && done && (
+            <div className="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center text-center p-4 z-10">
+              <CheckCircle2 className="w-12 h-12 text-emerald-400 animate-bounce mb-3" />
+              <h4 className="font-semibold text-white">Face Capturing Completed</h4>
+              <p className="text-xs text-slate-400 max-w-xs mt-1">
+                All 5 poses have been registered. Fill in details and click submit to save.
+              </p>
+            </div>
+          )}
         </div>
 
-        {error && (
-          <div className="mt-3 text-sm bg-red-500/10 text-red-300 border border-red-500/30 rounded-lg px-3 py-2">
-            {error}
+        {webcamError && (
+          <div className="text-xs bg-red-500/10 text-red-300 border border-red-500/20 rounded-lg px-3 py-2 flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 shrink-0" />
+            <span>{webcamError}</span>
           </div>
         )}
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        {/* Buttons Controls */}
+        <div className="flex flex-wrap gap-2 pt-1">
           {!ready ? (
-            <button
+            <motion.button
+              whileTap={{ scale: 0.98 }}
               onClick={start}
-              className="px-4 py-2 bg-indigo-500 hover:bg-indigo-400 rounded-lg text-sm font-medium transition"
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-semibold shadow-lg shadow-indigo-500/10 transition duration-300 flex items-center gap-1.5"
             >
+              <Camera className="w-4 h-4" />
               Start Camera
-            </button>
+            </motion.button>
           ) : (
             <>
-              <button
+              <motion.button
+                whileTap={{ scale: 0.98 }}
                 onClick={captureSample}
                 disabled={busy || done || !modelReady}
-                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 rounded-lg text-sm font-medium text-slate-900 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 rounded-lg text-sm font-bold text-slate-950 transition duration-300 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
               >
                 {busy ? "Capturing…" : `📸 Capture Pose ${Math.min(step + 1, POSES.length)}`}
-              </button>
+              </motion.button>
               {step > 0 && !done && (
-                <button
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
                   onClick={undoLast}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm transition"
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 text-slate-300"
                 >
-                  ↶ Undo
-                </button>
+                  <Undo2 className="w-3.5 h-3.5" />
+                  Undo
+                </motion.button>
               )}
-              <button
+              <motion.button
+                whileTap={{ scale: 0.98 }}
                 onClick={reset}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm transition"
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 text-slate-300"
               >
+                <RotateCcw className="w-3.5 h-3.5" />
                 Reset
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.98 }}
                 onClick={stop}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm transition"
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 text-slate-300"
               >
+                <CameraOff className="w-3.5 h-3.5" />
                 Stop
-              </button>
+              </motion.button>
             </>
           )}
         </div>
 
-        {/* Progress dots */}
-        <div className="mt-4 grid grid-cols-5 gap-1.5">
-          {POSES.map((p, i) => (
-            <div key={i} className="space-y-1">
-              <div
-                className={`h-1.5 rounded-full transition ${
-                  i < step
-                    ? "bg-gradient-to-r from-indigo-500 to-fuchsia-500"
-                    : i === step
-                      ? "bg-indigo-500/40"
-                      : "bg-slate-800"
-                }`}
-              />
-              <div
-                className={`text-center text-[10px] leading-tight ${
-                  i < step
-                    ? "text-emerald-300"
-                    : i === step
-                      ? "text-indigo-300 font-semibold"
-                      : "text-slate-600"
-                }`}
-              >
-                {p.arrow}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {modelLoading && !modelReady && (
-          <div className="mt-3 text-xs text-amber-300 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-            Loading face recognition model (one-time, ~6 MB)…
+        {/* Progress bar and indicators */}
+        <div className="pt-2">
+          <div className="flex items-center justify-between text-xs text-slate-400 mb-2 font-medium">
+            <span>Scan Progress</span>
+            <span className="font-bold text-indigo-400">{step}/{POSES.length} Captured</span>
           </div>
-        )}
-      </div>
-
-      {/* Form panel */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-        <h2 className="font-semibold text-slate-100 mb-4">Student Details</h2>
-        <div className="space-y-3">
-          <Field
-            label="Student ID"
-            value={form.student_id}
-            onChange={(v) => setForm({ ...form, student_id: v })}
-          />
-          <Field
-            label="Full Name"
-            value={form.name}
-            onChange={(v) => setForm({ ...form, name: v })}
-          />
-          <div className="grid grid-cols-2 gap-3">
-            <Field
-              label="Department"
-              value={form.department}
-              onChange={(v) => setForm({ ...form, department: v })}
-            />
-            <Field
-              label="Batch"
-              value={form.batch}
-              onChange={(v) => setForm({ ...form, batch: v })}
-            />
-          </div>
-        </div>
-
-        {/* Pose checklist */}
-        <div className="mt-5">
-          <div className="text-xs font-medium text-slate-400 mb-2">
-            Capture Checklist
-          </div>
-          <div className="space-y-1.5">
+          <div className="grid grid-cols-5 gap-1.5">
             {POSES.map((p, i) => {
               const completed = i < step;
               const active = i === step && !done;
               return (
-                <div
-                  key={i}
-                  className={`flex items-center gap-2 text-xs px-2.5 py-1.5 rounded-lg border ${
-                    completed
-                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-200"
-                      : active
-                        ? "bg-indigo-500/10 border-indigo-500/40 text-indigo-100"
-                        : "bg-slate-800/50 border-slate-800 text-slate-500"
-                  }`}
-                >
-                  <span className="w-5 text-center">
-                    {completed ? "✓" : active ? "▶" : "○"}
-                  </span>
-                  <span className="text-base">{p.emoji}</span>
-                  <span className="flex-1">{p.label}</span>
+                <div key={i} className="space-y-1">
+                  <div
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      completed
+                        ? "bg-gradient-to-r from-indigo-500 to-fuchsia-500 shadow-md shadow-indigo-500/20"
+                        : active
+                          ? "bg-indigo-500/40 animate-pulse"
+                          : "bg-slate-800"
+                    }`}
+                  />
+                  <div
+                    className={`text-center text-[10px] font-bold ${
+                      completed
+                        ? "text-emerald-400"
+                        : active
+                          ? "text-indigo-400 animate-bounce"
+                          : "text-slate-600"
+                    }`}
+                  >
+                    {p.arrow}
+                  </div>
                 </div>
               );
             })}
           </div>
         </div>
 
-
-
-
-        {status && (
-          <div
-            className={`mt-4 text-sm border rounded-lg px-3 py-2 ${
-              statusKind === "ok"
-                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-200"
-                : statusKind === "err"
-                  ? "bg-rose-500/10 border-rose-500/30 text-rose-200"
-                  : "bg-slate-800/70 border-slate-700 text-slate-200"
-            }`}
-          >
-            {status}
+        {modelLoading && !modelReady && (
+          <div className="text-xs text-amber-300 flex items-center gap-2 bg-amber-500/10 border border-amber-500/10 p-2 rounded-lg">
+            <Info className="w-4 h-4 shrink-0 text-amber-400" />
+            Loading local AI models (one-time, ~6 MB)…
           </div>
         )}
+      </div>
 
-        <button
-          onClick={submit}
-          disabled={busy || !done}
-          className="mt-5 w-full py-2.5 bg-gradient-to-r from-indigo-500 to-fuchsia-500 hover:from-indigo-400 hover:to-fuchsia-400 rounded-lg font-medium shadow-lg shadow-indigo-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition"
-        >
-          {busy ? "Registering…" : "Register Student"}
-        </button>
+      {/* Form panel */}
+      <div className="glass-panel border border-slate-800/80 rounded-2xl p-5 shadow-xl flex flex-col justify-between self-stretch">
+        <div className="space-y-4">
+          <div>
+            <h2 className="font-semibold text-slate-100">Student Details</h2>
+            <p className="text-xs text-slate-500 mt-1">
+              Associate captured facial prints with official student database records.
+            </p>
+          </div>
+          
+          <div className="space-y-3">
+            <Field
+              label="Student ID"
+              value={form.student_id}
+              onChange={(v) => setForm({ ...form, student_id: v })}
+              placeholder="e.g. STU-2025-001"
+            />
+            <Field
+              label="Full Name"
+              value={form.name}
+              onChange={(v) => setForm({ ...form, name: v })}
+              placeholder="e.g. John Doe"
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <Field
+                label="Department"
+                value={form.department}
+                onChange={(v) => setForm({ ...form, department: v })}
+              />
+              <Field
+                label="Batch"
+                value={form.batch}
+                onChange={(v) => setForm({ ...form, batch: v })}
+              />
+            </div>
+          </div>
+
+          {/* Pose Checklist instructions */}
+          <div className="pt-2">
+            <div className="text-xs font-semibold text-slate-400 mb-2.5 uppercase tracking-wider">
+              Capture checklist
+            </div>
+            <div className="space-y-1.5">
+              {POSES.map((p, i) => {
+                const completed = i < step;
+                const active = i === step && !done;
+                return (
+                  <div
+                    key={i}
+                    className={`flex items-center gap-3 text-xs px-3 py-2 rounded-xl border transition-all duration-300 ${
+                      completed
+                        ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-300"
+                        : active
+                          ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-200"
+                          : "bg-slate-900/30 border-slate-800/60 text-slate-600"
+                    }`}
+                  >
+                    <span className="w-5 h-5 rounded-full flex items-center justify-center bg-slate-950/50 shrink-0 font-bold">
+                      {completed ? "✓" : active ? "▶" : "○"}
+                    </span>
+                    <span className="text-sm shrink-0 select-none">{p.emoji}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className={`font-medium ${active ? "text-indigo-300" : ""}`}>{p.label}</div>
+                      {active && (
+                        <div className="text-[10px] text-slate-400 mt-0.5">{p.hint}</div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-5 mt-auto">
+          {status && (
+            <div
+              className={`mb-4 text-xs font-medium border rounded-xl px-3 py-2.5 flex items-center gap-2 ${
+                statusKind === "ok"
+                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-300"
+                  : statusKind === "err"
+                    ? "bg-rose-500/10 border-rose-500/20 text-rose-300"
+                    : "bg-slate-950/40 border-slate-800 text-slate-300"
+              }`}
+            >
+              <Info className={`w-4 h-4 shrink-0 ${statusKind === "ok" ? "text-emerald-400" : statusKind === "err" ? "text-rose-400" : "text-indigo-400"}`} />
+              <span>{status}</span>
+            </div>
+          )}
+
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            onClick={submit}
+            disabled={busy || !done}
+            className="w-full py-2.5 bg-gradient-to-r from-indigo-500 to-fuchsia-500 hover:from-indigo-400 hover:to-fuchsia-400 text-white rounded-lg font-bold shadow-lg shadow-indigo-500/25 disabled:opacity-40 disabled:cursor-not-allowed transition duration-300 flex items-center justify-center gap-2"
+          >
+            <UserCheck className="w-5 h-5" />
+            <span>{busy ? "Registering…" : "Register Student"}</span>
+          </motion.button>
+        </div>
       </div>
     </div>
   );
@@ -422,11 +455,11 @@ function DirectionArrow({ arrow }) {
     "◀": "left-4 top-1/2 -translate-y-1/2",
     "▶": "right-4 top-1/2 -translate-y-1/2",
     "▲": "top-4 left-1/2 -translate-x-1/2",
-    "▼": "bottom-16 left-1/2 -translate-x-1/2",
+    "▼": "bottom-4 left-1/2 -translate-x-1/2",
   };
   return (
     <div
-      className={`absolute ${positions[arrow]} text-5xl text-indigo-300/80 animate-pulse drop-shadow-[0_0_8px_rgba(99,102,241,0.8)] pointer-events-none`}
+      className={`absolute ${positions[arrow]} text-5xl text-indigo-300/80 animate-pulse drop-shadow-[0_0_12px_rgba(99,102,241,0.9)] pointer-events-none z-10`}
     >
       {arrow}
     </div>
@@ -436,7 +469,7 @@ function DirectionArrow({ arrow }) {
 function Field({ label, value, onChange, placeholder }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-400 mb-1">
+      <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
         {label}
       </label>
       <input
@@ -444,7 +477,7 @@ function Field({ label, value, onChange, placeholder }) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-3 py-2 bg-slate-800/70 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-100 text-sm"
+        className="w-full px-3.5 py-2 bg-slate-950/50 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-100 text-sm placeholder-slate-700 transition"
       />
     </div>
   );
