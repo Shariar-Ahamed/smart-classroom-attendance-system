@@ -253,8 +253,8 @@ export default function Dashboard() {
                     <td className="py-3 px-3 text-slate-400 font-medium">
                       {s.department}
                     </td>
-                    <td className="py-3 px-3 text-slate-400 font-mono">
-                      {s.batch}
+                    <td className="py-3 px-3 text-slate-400 font-semibold">
+                      {s.batch} (Sec {s.section || "A"})
                     </td>
                     <td className="py-3 px-3 text-slate-400 font-mono font-semibold">
                       {s.attended}

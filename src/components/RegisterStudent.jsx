@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import CustomSelect from "./CustomSelect";
-import { DEPARTMENTS } from "../constants/departments";
+import { DEPARTMENTS, getShortForm, generateSemesters } from "../constants/departments";
 import { useWebcam } from "../hooks/useWebcam";
 import { api } from "../services/api";
 import {
@@ -104,8 +104,9 @@ export default function RegisterStudent({ onDone }) {
     student_id: "",
     name: "",
     department: "Computer Science & Engineering",
-    batch: "2025",
+    batch: "CSE-1",
     section: "A",
+    semester: generateSemesters()[0],
   });
   const [descriptors, setDescriptors] = useState([]);
   const [status, setStatus] = useState("");
@@ -227,6 +228,7 @@ export default function RegisterStudent({ onDone }) {
         department: form.department.trim(),
         batch: form.batch.trim(),
         section: form.section.trim().toUpperCase(),
+        semester: form.semester.trim(),
         face_encoding: avg,
       });
       setMsg("🎉 Student successfully registered to MongoDB database!", "ok");
@@ -421,24 +423,31 @@ export default function RegisterStudent({ onDone }) {
             placeholder="e.g. John Doe"
           />
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-4 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
                 Department
               </label>
               <CustomSelect
                 value={form.department}
-                onChange={(val) => setForm({ ...form, department: val })}
+                onChange={(val) => {
+                  const sf = getShortForm(val);
+                  setForm({ ...form, department: val, batch: `${sf}-1` });
+                }}
                 options={DEPARTMENTS}
               />
             </div>
 
-            <Field
-              label="Batch"
-              value={form.batch}
-              onChange={(v) => setForm({ ...form, batch: v })}
-              placeholder="2025"
-            />
+            <div>
+              <label className="block text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
+                Batch
+              </label>
+              <CustomSelect
+                value={form.batch}
+                onChange={(val) => setForm({ ...form, batch: val })}
+                options={Array.from({ length: 100 }, (_, i) => `${getShortForm(form.department)}-${i + 1}`)}
+              />
+            </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
@@ -448,6 +457,17 @@ export default function RegisterStudent({ onDone }) {
                 value={form.section}
                 onChange={(val) => setForm({ ...form, section: val })}
                 options={Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i))}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
+                Semester
+              </label>
+              <CustomSelect
+                value={form.semester}
+                onChange={(val) => setForm({ ...form, semester: val })}
+                options={generateSemesters()}
               />
             </div>
           </div>

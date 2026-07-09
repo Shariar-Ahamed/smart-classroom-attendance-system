@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function CustomSelect({
@@ -11,6 +11,7 @@ export default function CustomSelect({
   disabled = false,
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
   const containerRef = useRef(null);
 
   // Normalize options to array of objects { value, label }
@@ -22,6 +23,13 @@ export default function CustomSelect({
   });
 
   const selectedOption = normalizedOptions.find((opt) => opt.value === value);
+
+  // Clear search on open/close
+  useEffect(() => {
+    if (!isOpen) {
+      setSearch("");
+    }
+  }, [isOpen]);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -39,6 +47,10 @@ export default function CustomSelect({
     onChange(val);
     setIsOpen(false);
   };
+
+  const filteredOptions = normalizedOptions.filter((opt) =>
+    opt.label.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div ref={containerRef} className={`relative select-none ${className}`}>
@@ -69,11 +81,27 @@ export default function CustomSelect({
             transition={{ duration: 0.15 }}
             className="absolute z-50 w-full mt-1.5 bg-slate-900/95 border border-slate-800/80 backdrop-blur-md rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
           >
+            {/* Search Input Box inside Dropdown */}
+            {normalizedOptions.length > 7 && (
+              <div className="p-2 border-b border-slate-800/80 bg-slate-950/40 sticky top-0 z-10 flex items-center gap-1.5">
+                <Search className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Type to search..."
+                  className="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500/40 text-xs text-slate-200 placeholder-slate-600 font-semibold"
+                />
+              </div>
+            )}
+
             <div className="py-1">
-              {normalizedOptions.length === 0 ? (
-                <div className="px-4 py-2 text-xs text-slate-500 italic">No options</div>
+              {filteredOptions.length === 0 ? (
+                <div className="px-4 py-3 text-xs text-slate-500 italic text-center">
+                  No matches found
+                </div>
               ) : (
-                normalizedOptions.map((opt) => {
+                filteredOptions.map((opt) => {
                   const isSelected = opt.value === value;
                   return (
                     <button

@@ -189,6 +189,7 @@ def register_student():
     department = data["department"].strip()
     batch = data["batch"].strip()
     section = data.get("section", "A").strip().upper()
+    semester = data.get("semester", "").strip()
 
     doc = {
         "student_id": student_id,
@@ -196,6 +197,7 @@ def register_student():
         "department": department,
         "batch": batch,
         "section": section,
+        "semester": semester,
         "face_encoding": avg,
         "created_at": datetime.utcnow(),
     }
@@ -243,6 +245,7 @@ def register_student():
             "department": department,
             "student_id": student_id,
             "section": section,
+            "semester": semester,
             "created_at": datetime.utcnow()
         })
     except Exception as e:

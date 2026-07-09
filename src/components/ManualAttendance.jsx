@@ -191,7 +191,7 @@ export default function ManualAttendance() {
                       <td className="py-2.5 px-3 text-slate-300">
                         {s.department}
                       </td>
-                      <td className="py-2.5 px-3 text-slate-300">{s.batch}</td>
+                      <td className="py-2.5 px-3 text-slate-300 font-semibold">{s.batch} (Sec {s.section || "A"})</td>
                       <td className="py-2.5 px-3">
                         {st ? (
                           <StatusPill status={st} />

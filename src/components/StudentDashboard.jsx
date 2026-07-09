@@ -149,16 +149,20 @@ export default function StudentDashboard() {
               </div>
             </div>
 
-            <div className="relative grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-800/60 text-sm">
+            <div className="relative grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-800/60 text-sm">
               <div>
                 <span className="block text-xs text-slate-500">Department</span>
                 <span className="font-medium text-slate-200 mt-0.5 block">{profile?.department}</span>
               </div>
               <div>
-                <span className="block text-xs text-slate-500">Batch</span>
-                <span className="font-medium text-slate-200 mt-0.5 block">{profile?.batch}</span>
+                <span className="block text-xs text-slate-500">Batch & Section</span>
+                <span className="font-medium text-slate-200 mt-0.5 block">{profile?.batch} (Sec {profile?.section || "A"})</span>
               </div>
-              <div className="col-span-2 sm:col-span-1">
+              <div>
+                <span className="block text-xs text-slate-500">Semester</span>
+                <span className="font-medium text-slate-200 mt-0.5 block">{profile?.semester || "N/A"}</span>
+              </div>
+              <div>
                 <span className="block text-xs text-slate-500">Enrolled Since</span>
                 <span className="font-medium text-slate-200 mt-0.5 block">
                   {profile?.created_at ? new Date(profile.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A"}
