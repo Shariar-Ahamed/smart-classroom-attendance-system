@@ -18,7 +18,7 @@ const CDN_MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/
 
 async function testModelPath(url) {
   try {
-    const res = await fetch(`${url}/tiny_face_detector_model-weights_manifest.json`);
+    const res = await fetch(`${url}/ssd_mobilenetv1_model-weights_manifest.json`);
     if (!res.ok) return false;
     const contentType = res.headers.get("content-type") || "";
     if (!contentType.includes("application/json")) {
@@ -49,7 +49,7 @@ export function loadFaceModel() {
     if (!isLocalValid) {
       activeUrl = CDN_MODEL_URL;
     }
-    await faceapi.nets.tinyFaceDetector.loadFromUri(activeUrl);
+    await faceapi.nets.ssdMobilenetv1.loadFromUri(activeUrl);
     await faceapi.nets.faceLandmark68Net.loadFromUri(activeUrl);
     await faceapi.nets.faceRecognitionNet.loadFromUri(activeUrl);
     loaded = true;
@@ -60,9 +60,8 @@ export function loadFaceModel() {
 // --------- detection helpers ---------
 
 const detectorOptions = () =>
-  new faceapi.TinyFaceDetectorOptions({
-    inputSize: 320,      // 224 / 320 / 416 / 512 — 320 is a good speed/accuracy balance
-    scoreThreshold: 0.5,
+  new faceapi.SsdMobilenetv1Options({
+    minConfidence: 0.4,
   });
 
 /** Detect ALL faces in a frame and compute their 128-d descriptors. */
