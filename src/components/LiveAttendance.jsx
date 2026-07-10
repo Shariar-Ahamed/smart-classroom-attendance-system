@@ -157,11 +157,8 @@ export default function LiveAttendance() {
           if (student) {
             o.name = student.name;
             try {
-              const res = await api.markAttendance({
-                student_id: o.student_id,
-                course_id: course,
-              });
-              if (res.status === "newly_marked" || res.status === "marked") {
+              const res = await api.markAttendance(o.student_id, course);
+              if (res) {
                 o.newlyMarked = true;
                 setOverlay([...newOverlay]); // trigger re-render of overlay border colors
 
@@ -173,7 +170,7 @@ export default function LiveAttendance() {
                     student_id: student.student_id,
                     name: student.name,
                     time,
-                    status: res.status,
+                    status: "Present",
                     distance: o.distance,
                   },
                   ...e.slice(0, 49),
