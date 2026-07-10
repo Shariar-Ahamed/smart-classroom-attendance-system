@@ -15,7 +15,7 @@ import ConfirmModal from "./ConfirmModal";
 export default function ManualAttendance() {
   const [students, setStudents] = useState([]);
   const [courses, setCourses] = useState([]);
-  const [course, setCourse] = useState("");
+  const [course, setCourse] = useState("all");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [records, setRecords] = useState([]);
   const [q, setQ] = useState("");
@@ -24,27 +24,61 @@ export default function ManualAttendance() {
   const [confirmMarkAllStatus, setConfirmMarkAllStatus] = useState(null);
 
   const load = async () => {
-    if (!course) {
-      setStudents([]);
-      setRecords([]);
-      return;
+    if (course === "all") {
+      try {
+        if (courses.length === 0) return;
+        const promises = courses.map((c) => api.listStudents(c.course_id));
+        const results = await Promise.all(promises);
+        const uniqueStudentsMap = {};
+        results.flat().forEach((s) => {
+          uniqueStudentsMap[s.student_id] = s;
+        });
+        setStudents(Object.values(uniqueStudentsMap));
+        setRecords(await api.getAttendance({ date }));
+      } catch (err) {
+        console.error("Failed to load all student records:", err);
+      }
+    } else {
+      if (!course) {
+        setStudents([]);
+        setRecords([]);
+        return;
+      }
+      setStudents(await api.listStudents(course));
+      setRecords(await api.getAttendance({ date, course_id: course }));
     }
-    setStudents(await api.listStudents(course));
-    setRecords(await api.getAttendance({ date, course_id: course }));
   };
 
   useEffect(() => {
-    (async () => setCourses(await api.listCourses()))();
+    (async () => {
+      const cList = await api.listCourses();
+      setCourses(cList);
+    })();
   }, []);
 
   useEffect(() => {
-    load();
+    if (courses.length > 0 || course !== "all") {
+      load();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [date, course]);
+  }, [date, course, courses]);
 
   const statusFor = (sid) => {
-    const r = records.find((r) => r.student_id === sid);
-    return r ? r.status : null;
+    if (course === "all") {
+      const studentRecs = records.filter((r) => r.student_id === sid);
+      if (studentRecs.length === 0) return null;
+      const hasPresent = studentRecs.some((r) => r.status === "Present");
+      return hasPresent ? "Present" : "Absent";
+    } else {
+      const r = records.find((r) => r.student_id === sid && r.course_id === course);
+      return r ? r.status : null;
+    }
+  };
+
+  const getCourseAttendanceDetail = (sid) => {
+    const studentRecs = records.filter((r) => r.student_id === sid);
+    if (studentRecs.length === 0) return "No records today";
+    return studentRecs.map((r) => `${r.course_id}: ${r.status}`).join(", ");
   };
 
   const setStatus = async (s, status) => {
@@ -103,10 +137,13 @@ export default function ManualAttendance() {
               value={course}
               onChange={setCourse}
               className="min-w-[240px]"
-              options={courses.map((c) => ({
-                value: c.course_id,
-                label: `${c.course_id} — ${c.name}`,
-              }))}
+              options={[
+                { value: "all", label: "All Courses" },
+                ...courses.map((c) => ({
+                  value: c.course_id,
+                  label: `${c.course_id} — ${c.name}`,
+                })),
+              ]}
             />
             <input
               type="date"
@@ -130,22 +167,24 @@ export default function ManualAttendance() {
             placeholder="Search student by ID or name…"
             className="flex-1 min-w-[200px] px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
-          <div className="flex gap-2">
-            <button
-              onClick={() => markAll("Present")}
-              disabled={students.length === 0}
-              className="px-3 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-500/40 rounded-lg text-xs font-medium transition disabled:opacity-40"
-            >
-              ✓ All Present
-            </button>
-            <button
-              onClick={() => markAll("Absent")}
-              disabled={students.length === 0}
-              className="px-3 py-2 bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-500/40 rounded-lg text-xs font-medium transition disabled:opacity-40"
-            >
-              ✗ All Absent
-            </button>
-          </div>
+          {course !== "all" && (
+            <div className="flex gap-2">
+              <button
+                onClick={() => markAll("Present")}
+                disabled={students.length === 0}
+                className="px-3 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-500/40 rounded-lg text-xs font-medium transition disabled:opacity-40"
+              >
+                ✓ All Present
+              </button>
+              <button
+                onClick={() => markAll("Absent")}
+                disabled={students.length === 0}
+                className="px-3 py-2 bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-500/40 rounded-lg text-xs font-medium transition disabled:opacity-40"
+              >
+                ✗ All Absent
+              </button>
+            </div>
+          )}
         </div>
 
         {savedTick > 0 && (
@@ -205,30 +244,38 @@ export default function ManualAttendance() {
                         )}
                       </td>
                       <td className="py-2.5 px-3">
-                        <div className="flex justify-end gap-1.5">
-                          <button
-                            disabled={busy}
-                            onClick={() => setStatus(s, "Present")}
-                            className={`px-2.5 py-1 rounded-md text-xs font-medium border transition disabled:opacity-50 ${
-                              st === "Present"
-                                ? "bg-emerald-500/30 border-emerald-500/60 text-emerald-100"
-                                : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-emerald-500/10 hover:border-emerald-500/30"
-                            }`}
-                          >
-                            Present
-                          </button>
-                          <button
-                            disabled={busy}
-                            onClick={() => setStatus(s, "Absent")}
-                            className={`px-2.5 py-1 rounded-md text-xs font-medium border transition disabled:opacity-50 ${
-                              st === "Absent"
-                                ? "bg-rose-500/30 border-rose-500/60 text-rose-100"
-                                : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-rose-500/10 hover:border-rose-500/30"
-                            }`}
-                          >
-                            Absent
-                          </button>
-                        </div>
+                        {course === "all" ? (
+                          <div className="text-right">
+                            <span className="text-[10px] text-slate-400 font-semibold bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800/80">
+                              {getCourseAttendanceDetail(s.student_id)}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex justify-end gap-1.5">
+                            <button
+                              disabled={busy}
+                              onClick={() => setStatus(s, "Present")}
+                              className={`px-2.5 py-1 rounded-md text-xs font-medium border transition disabled:opacity-50 ${
+                                st === "Present"
+                                  ? "bg-emerald-500/30 border-emerald-500/60 text-emerald-100"
+                                  : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-emerald-500/10 hover:border-emerald-500/30"
+                              }`}
+                            >
+                               Present
+                            </button>
+                            <button
+                              disabled={busy}
+                              onClick={() => setStatus(s, "Absent")}
+                              className={`px-2.5 py-1 rounded-md text-xs font-medium border transition disabled:opacity-50 ${
+                                st === "Absent"
+                                  ? "bg-rose-500/30 border-rose-500/60 text-rose-100"
+                                  : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-rose-500/10 hover:border-rose-500/30"
+                              }`}
+                            >
+                               Absent
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   );
