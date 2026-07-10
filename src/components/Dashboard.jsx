@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 import { motion } from "framer-motion";
 import {
   Users,
@@ -14,15 +15,49 @@ import {
 } from "lucide-react";
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const [students, setStudents] = useState([]);
   const [records, setRecords] = useState([]);
 
   useEffect(() => {
     (async () => {
-      setStudents(await api.listStudents());
-      setRecords(await api.getAttendance());
+      const allStudents = await api.listStudents();
+      const allRecords = await api.getAttendance();
+
+      if (user?.role === "FACULTY") {
+        try {
+          const assignedCourses = await api.listCourses();
+          const assignedCourseIds = assignedCourses.map((c) => c.course_id);
+
+          const registrations = await api.getStudentRegistrations();
+          const enrolledStudentIds = new Set(
+            registrations
+              .filter((reg) =>
+                reg.course_ids.some((cid) => assignedCourseIds.includes(cid))
+              )
+              .map((reg) => reg.student_id)
+          );
+
+          const facultyStudents = allStudents.filter((s) =>
+            enrolledStudentIds.has(s.student_id)
+          );
+          const facultyRecords = allRecords.filter((r) =>
+            assignedCourseIds.includes(r.course_id)
+          );
+
+          setStudents(facultyStudents);
+          setRecords(facultyRecords);
+        } catch (e) {
+          console.error("Error filtering faculty dashboard data:", e);
+          setStudents([]);
+          setRecords([]);
+        }
+      } else {
+        setStudents(allStudents);
+        setRecords(allRecords);
+      }
     })();
-  }, []);
+  }, [user]);
 
   const today = new Date().toISOString().slice(0, 10);
   const todayRecords = records.filter((r) => r.date === today);
@@ -100,28 +135,28 @@ export default function Dashboard() {
           value={students.length}
           icon={Users}
           tone="indigo"
-          desc="Enrolled in system"
+          desc={user?.role === "FACULTY" ? "Enrolled in your courses" : "Enrolled in system"}
         />
         <KpiCard
           label="Present Today"
           value={presentToday}
           icon={CheckCircle2}
           tone="emerald"
-          desc="Marked present"
+          desc={user?.role === "FACULTY" ? "Present in your classes" : "Marked present"}
         />
         <KpiCard
           label="Absent Today"
           value={absentToday}
           icon={XCircle}
           tone="rose"
-          desc="Pending attendance"
+          desc={user?.role === "FACULTY" ? "Absent in your classes" : "Pending attendance"}
         />
         <KpiCard
           label="Attendance %"
           value={`${percent}%`}
           icon={TrendingUp}
           tone="purple"
-          desc="Daily average rate"
+          desc={user?.role === "FACULTY" ? "Your courses average" : "Daily average rate"}
         />
       </div>
 
@@ -191,7 +226,7 @@ export default function Dashboard() {
             )}
             {todayRecords.slice(0, 20).map((r) => (
               <div
-                key={r.id}
+                key={r._id || r.id}
                 className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/35 border border-slate-800/60 hover:border-slate-700/60 transition duration-300"
               >
                 <div className="min-w-0">

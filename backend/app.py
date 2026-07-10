@@ -727,7 +727,7 @@ def save_faculty_assignment():
 
 
 @app.route("/api/assignments/student", methods=["GET"])
-@require_auth("ADMIN")
+@require_auth("ADMIN", "FACULTY")
 def get_student_registrations():
     student_id = request.args.get("student_id", "").strip().upper()
     semester = request.args.get("semester", "").strip()
