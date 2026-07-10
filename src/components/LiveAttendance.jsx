@@ -21,7 +21,8 @@ import {
   Info,
   ScanLine,
   UserCheck,
-  ChevronRight
+  ChevronRight,
+  X
 } from "lucide-react";
 
 // Distance threshold for FaceNet descriptors (lower = stricter).
@@ -36,6 +37,8 @@ export default function LiveAttendance() {
   const [courses, setCourses] = useState([]);
   const [course, setCourse] = useState("");
   const [records, setRecords] = useState([]);
+  const [allStudents, setAllStudents] = useState([]);
+  const [scanNotification, setScanNotification] = useState(null);
   const [running, setRunning] = useState(false);
   const [events, setEvents] = useState([]);
   const [todayCount, setTodayCount] = useState(0);
@@ -56,6 +59,9 @@ export default function LiveAttendance() {
         setCourse(cList[0].course_id);
       }
       refreshToday();
+      
+      const allS = await api.listStudents();
+      setAllStudents(allS);
     })();
   }, []);
 
@@ -106,6 +112,13 @@ export default function LiveAttendance() {
       return;
     }
     try {
+      // Refresh students lists on scanner activation
+      const allS = await api.listStudents();
+      setAllStudents(allS);
+      if (course) {
+        setStudents(await api.listStudents(course));
+      }
+      
       await start();
       setRunning(true);
       setFramesProcessed(0);
@@ -136,12 +149,12 @@ export default function LiveAttendance() {
     }
 
     loopRef.current = setInterval(async () => {
-      if (inFlightRef.current) return;
+      if (inFlightRef.current || scanNotification) return;
       inFlightRef.current = true;
       try {
         const results = await recognizeAllFaces(
           videoRef.current,
-          students,
+          allStudents,
           MATCH_THRESHOLD,
         );
 
@@ -160,19 +173,62 @@ export default function LiveAttendance() {
 
         // Mark attendance via backend for each detected student
         for (const o of newOverlay) {
-          const student = students.find((s) => s.student_id === o.student_id);
+          const student = allStudents.find((s) => s.student_id === o.student_id);
           if (student) {
             o.name = student.name;
+            const isEnrolled = students.some((s) => s.student_id === o.student_id);
+            const time = new Date().toLocaleTimeString();
+
+            if (!isEnrolled) {
+              // State 3: Not Enrolled popup and feed event
+              if (!scanNotification || scanNotification.student_id !== student.student_id) {
+                setScanNotification({
+                  type: "not_enrolled",
+                  student_id: student.student_id,
+                  name: student.name,
+                  title: "Not Enrolled",
+                  message: `Not registered for ${course}`,
+                });
+              }
+
+              setEvents((e) => {
+                if (e.some((ev) => ev.student_id === student.student_id && ev.note === "Not Enrolled")) return e;
+                return [
+                  {
+                    id: Math.random().toString(),
+                    student_id: student.student_id,
+                    name: student.name,
+                    time,
+                    status: "Absent",
+                    distance: o.distance,
+                    note: "Not Enrolled",
+                  },
+                  ...e.slice(0, 49),
+                ];
+              });
+              continue;
+            }
+
             try {
               const res = await api.markAttendance(o.student_id, course);
-              const time = new Date().toLocaleTimeString();
               if (res) {
                 o.newlyMarked = true;
                 setOverlay([...newOverlay]); // trigger re-render of overlay border colors
 
-                // Log a temporary event feed alert
+                // State 1: Newly marked Present popup
+                if (!scanNotification || scanNotification.student_id !== student.student_id) {
+                  setScanNotification({
+                    type: "success",
+                    student_id: student.student_id,
+                    name: student.name,
+                    title: "Attendance Confirmed",
+                    message: "Successfully marked Present",
+                  });
+                }
+
+                // Log to event feed
                 setEvents((e) => {
-                  if (e.some((ev) => ev.student_id === student.student_id)) return e;
+                  if (e.some((ev) => ev.student_id === student.student_id && ev.status === "Present" && !ev.note)) return e;
                   return [
                     {
                       id: Math.random().toString(),
@@ -187,11 +243,21 @@ export default function LiveAttendance() {
                 });
                 refreshToday();
               } else {
-                // If they are in the records already as Present or Absent
+                // State 2: Already Marked check
                 const existingRecord = records.find((r) => r.student_id === student.student_id);
                 if (existingRecord) {
+                  if (!scanNotification || scanNotification.student_id !== student.student_id) {
+                    setScanNotification({
+                      type: "already",
+                      student_id: student.student_id,
+                      name: student.name,
+                      title: "Already Checked In",
+                      message: "Has already attended today",
+                    });
+                  }
+
                   setEvents((e) => {
-                    if (e.some((ev) => ev.student_id === student.student_id)) return e;
+                    if (e.some((ev) => ev.student_id === student.student_id && ev.note === "Already Marked")) return e;
                     return [
                       {
                         id: Math.random().toString(),
@@ -225,7 +291,7 @@ export default function LiveAttendance() {
         loopRef.current = null;
       }
     };
-  }, [running, ready, students, course]);
+  }, [running, ready, students, course, allStudents, records, scanNotification]);
 
   // Clean stop on unmount
   useEffect(() => {
@@ -385,6 +451,93 @@ export default function LiveAttendance() {
               </div>
             </>
           )}
+
+          {/* HUD Notification Popup Overlay */}
+          <AnimatePresence>
+            {scanNotification && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -15 }}
+                className="absolute inset-0 flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-sm z-30"
+              >
+                <motion.div
+                  initial={{ y: 8 }}
+                  animate={{ y: 0 }}
+                  className={`max-w-xs sm:max-w-md w-full border rounded-2xl p-6 shadow-2xl flex flex-col items-center text-center space-y-4 relative ${
+                    scanNotification.type === "success"
+                      ? "bg-emerald-950/90 border-emerald-500/30 text-emerald-100 shadow-emerald-500/5"
+                      : scanNotification.type === "already"
+                      ? "bg-indigo-950/90 border-indigo-500/30 text-indigo-100 shadow-indigo-500/5"
+                      : "bg-amber-950/90 border-amber-500/30 text-amber-100 shadow-amber-500/5"
+                  }`}
+                >
+                  {/* Close button to stop scanner */}
+                  <button
+                    onClick={() => {
+                      handleStop();
+                      setScanNotification(null);
+                    }}
+                    className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 transition cursor-pointer"
+                    title="Close and Stop Scanner"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                  {/* Animated Icon Container */}
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1, rotate: [0, -10, 10, 0] }}
+                    transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
+                    className={`w-14 h-14 rounded-full flex items-center justify-center border-2 ${
+                      scanNotification.type === "success"
+                        ? "bg-emerald-500/20 border-emerald-400 text-emerald-400"
+                        : scanNotification.type === "already"
+                        ? "bg-indigo-500/20 border-indigo-400 text-indigo-400"
+                        : "bg-amber-500/20 border-amber-400 text-amber-400"
+                    }`}
+                  >
+                    {scanNotification.type === "success" ? (
+                      <motion.svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={3.5}
+                        stroke="currentColor"
+                        className="w-7 h-7"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: 0.35, ease: "easeOut", delay: 0.2 }}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </motion.svg>
+                    ) : scanNotification.type === "already" ? (
+                      <Info className="w-7 h-7" />
+                    ) : (
+                      <ShieldAlert className="w-7 h-7" />
+                    )}
+                  </motion.div>
+
+                  <div className="space-y-1.5 w-full">
+                    <h3 className={`text-[10px] font-bold uppercase tracking-widest ${
+                      scanNotification.type === "success"
+                        ? "text-emerald-400"
+                        : scanNotification.type === "already"
+                        ? "text-indigo-400"
+                        : "text-amber-400"
+                    }`}>
+                      {scanNotification.title}
+                    </h3>
+                    <h2 className="text-base sm:text-lg font-bold text-slate-100 truncate w-full px-2">
+                      {scanNotification.name}
+                    </h2>
+                    <p className="text-xs text-slate-400 font-medium">
+                      {scanNotification.message}
+                    </p>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {modelError && (
@@ -466,21 +619,33 @@ export default function LiveAttendance() {
                   className="flex items-center justify-between p-3 rounded-xl bg-slate-950/40 border border-slate-800/60 hover:border-slate-700/60 transition duration-300"
                 >
                   <div className="min-w-0 flex-1 pr-2">
-                    <div className="text-sm font-semibold text-slate-100 truncate flex items-center gap-1.5">
-                      <UserCheck className={`w-4 h-4 shrink-0 ${ev.note ? "text-indigo-400" : "text-emerald-400"}`} />
-                      {ev.name}
+                    <div className="text-sm font-semibold text-slate-100 flex items-center justify-between gap-2 flex-wrap">
+                      <span className="flex items-center gap-1.5 min-w-0">
+                        <UserCheck className={`w-4 h-4 shrink-0 ${
+                          ev.note === "Already Marked"
+                            ? "text-indigo-400"
+                            : ev.note === "Not Enrolled"
+                            ? "text-amber-500"
+                            : "text-emerald-400"
+                        }`} />
+                        <span className="truncate">{ev.name}</span>
+                      </span>
                       {ev.note && (
-                        <span className="text-[9px] font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.2 rounded-full uppercase tracking-wider">
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 ${
+                          ev.note === "Already Marked"
+                            ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
+                            : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                        }`}>
                           {ev.note}
                         </span>
                       )}
                     </div>
-                    <div className="text-[10px] text-slate-500 font-mono mt-0.5 flex items-center gap-1.5">
+                    <div className="text-[10px] text-slate-500 font-mono mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
                       <span>{ev.student_id}</span>
-                      <ChevronRight className="w-3 h-3 text-slate-700" />
-                      <span>{course}</span>
-                      <ChevronRight className="w-3 h-3 text-slate-700" />
-                      <span className="text-indigo-400 font-bold">{conf}% confidence</span>
+                      <ChevronRight className="w-3 h-3 text-slate-700 shrink-0" />
+                      <span className="truncate max-w-[80px]">{course}</span>
+                      <ChevronRight className="w-3 h-3 text-slate-700 shrink-0" />
+                      <span className="text-indigo-400 font-bold shrink-0">{conf}% confidence</span>
                     </div>
                   </div>
                   <span className="text-[10px] font-bold text-slate-500 bg-slate-900/50 border border-slate-800 px-2 py-0.5 rounded-full font-mono shrink-0">
