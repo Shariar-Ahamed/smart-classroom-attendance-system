@@ -550,7 +550,7 @@ def patch_attendance(record_id):
 
 
 @app.route("/api/attendance/<record_id>", methods=["DELETE"])
-@require_auth("ADMIN")
+@require_auth("ADMIN", "FACULTY")
 def delete_attendance(record_id):
     ok = delete_record(record_id)
     if not ok:

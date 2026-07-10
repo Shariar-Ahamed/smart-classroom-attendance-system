@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import CustomSelect from "./CustomSelect";
 import { api } from "../services/api";
 import ConfirmModal from "./ConfirmModal";
+import { useAuth } from "../context/AuthContext";
 
 export default function AttendanceRecords() {
+  const { user } = useAuth();
   const [records, setRecords] = useState([]);
   const [courses, setCourses] = useState([]);
   const [date, setDate] = useState("");
@@ -11,6 +13,8 @@ export default function AttendanceRecords() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [editingId, setEditingId] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
+
+  const canManage = user?.role === "ADMIN" || user?.role === "FACULTY";
 
   const load = async () => {
     let recs = await api.getAttendance({
@@ -146,13 +150,13 @@ export default function AttendanceRecords() {
                   <th className="py-2 px-3">Time</th>
                   <th className="py-2 px-3">Source</th>
                   <th className="py-2 px-3">Status</th>
-                  <th className="py-2 px-3 text-right">Actions</th>
+                  {canManage && <th className="py-2 px-3 text-right">Actions</th>}
                 </tr>
               </thead>
               <tbody>
                 {records.map((r) => (
                   <tr
-                    key={r.id}
+                    key={r._id}
                     className="border-b border-slate-800/60 hover:bg-slate-800/30"
                   >
                     <td className="py-2.5 px-3 font-mono text-xs text-slate-300">
@@ -182,50 +186,64 @@ export default function AttendanceRecords() {
                       </span>
                     </td>
                     <td className="py-2.5 px-3">
-                      {editingId === r.id ? (
-                        <div className="flex items-center gap-1">
+                      {canManage ? (
+                        editingId === r._id ? (
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => changeStatus(r._id, "Present")}
+                              className="px-2 py-0.5 text-xs rounded-md bg-emerald-500/20 text-emerald-200 border border-emerald-500/40 hover:bg-emerald-500/30 transition"
+                            >
+                              Present
+                            </button>
+                            <button
+                              onClick={() => changeStatus(r._id, "Absent")}
+                              className="px-2 py-0.5 text-xs rounded-md bg-rose-500/20 text-rose-200 border border-rose-500/40 hover:bg-rose-500/30 transition"
+                            >
+                              Absent
+                            </button>
+                            <button
+                              onClick={() => setEditingId(null)}
+                              className="px-2 py-0.5 text-xs rounded-md bg-slate-700 text-slate-300 hover:bg-slate-600 transition"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ) : (
                           <button
-                            onClick={() => changeStatus(r.id, "Present")}
-                            className="px-2 py-0.5 text-xs rounded-md bg-emerald-500/20 text-emerald-200 border border-emerald-500/40 hover:bg-emerald-500/30 transition"
+                            onClick={() => setEditingId(r._id)}
+                            title="Click to change status"
+                            className={`inline-flex items-center gap-1 text-xs font-medium border px-2 py-0.5 rounded-full transition hover:brightness-125 ${
+                              r.status === "Present"
+                                ? "text-emerald-300 bg-emerald-500/15 border-emerald-500/30"
+                                : "text-rose-300 bg-rose-500/15 border-rose-500/30"
+                            }`}
                           >
-                            Present
+                            ● {r.status}
+                            <span className="opacity-60 ml-0.5">✎</span>
                           </button>
-                          <button
-                            onClick={() => changeStatus(r.id, "Absent")}
-                            className="px-2 py-0.5 text-xs rounded-md bg-rose-500/20 text-rose-200 border border-rose-500/40 hover:bg-rose-500/30 transition"
-                          >
-                            Absent
-                          </button>
-                          <button
-                            onClick={() => setEditingId(null)}
-                            className="px-2 py-0.5 text-xs rounded-md bg-slate-700 text-slate-300 hover:bg-slate-600 transition"
-                          >
-                            ✕
-                          </button>
-                        </div>
+                        )
                       ) : (
-                        <button
-                          onClick={() => setEditingId(r.id)}
-                          title="Click to change status"
-                          className={`inline-flex items-center gap-1 text-xs font-medium border px-2 py-0.5 rounded-full transition hover:brightness-125 ${
+                        <span
+                          className={`inline-flex items-center gap-1 text-xs font-medium border px-2 py-0.5 rounded-full ${
                             r.status === "Present"
                               ? "text-emerald-300 bg-emerald-500/15 border-emerald-500/30"
                               : "text-rose-300 bg-rose-500/15 border-rose-500/30"
                           }`}
                         >
                           ● {r.status}
-                          <span className="opacity-60 ml-0.5">✎</span>
-                        </button>
+                        </span>
                       )}
                     </td>
-                    <td className="py-2.5 px-3 text-right">
-                      <button
-                        onClick={() => removeRecord(r.id)}
-                        className="text-xs text-rose-300/80 hover:text-rose-200 hover:bg-rose-500/10 px-2 py-1 rounded transition"
-                      >
-                        Delete
-                      </button>
-                    </td>
+                    {canManage && (
+                      <td className="py-2.5 px-3 text-right">
+                        <button
+                          onClick={() => removeRecord(r._id)}
+                          className="text-xs text-rose-300/80 hover:text-rose-200 hover:bg-rose-500/10 px-2 py-1 rounded transition"
+                        >
+                          Reset
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -234,12 +252,12 @@ export default function AttendanceRecords() {
         )}
       </div>
 
-      {/* Custom Confirm Delete Modal */}
+      {/* Custom Confirm Reset Modal */}
       <ConfirmModal
         isOpen={!!confirmDelete}
-        title="Delete Attendance Record"
-        message="Are you sure you want to delete this attendance record? This action cannot be undone."
-        confirmText="Delete"
+        title="Reset Attendance Record"
+        message="Are you sure you want to reset this attendance record? This will delete the record, allowing the student to be scanned again or manually re-marked."
+        confirmText="Reset"
         onConfirm={handleConfirmDelete}
         onCancel={() => setConfirmDelete(null)}
       />
