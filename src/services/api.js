@@ -95,9 +95,16 @@ export const api = {
   // POST /api/mark-attendance (called by the live capture loop)
   async markAttendance(student_id, course_id) {
     try {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      const dateStr = `${y}-${m}-${d}`;
+      const timeStr = now.toTimeString().split(" ")[0];
+
       return await makeRequest("/api/mark-attendance", {
         method: "POST",
-        body: { student_id, course_id },
+        body: { student_id, course_id, date: dateStr, time: timeStr },
       });
     } catch (e) {
       // Return null on duplicate or error (following the original frontend contract)

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
+import { formatRecordDateTime } from "./AttendanceRecords";
 
 export default function StudentDashboard() {
   const { logout } = useAuth();
@@ -225,30 +226,33 @@ export default function StudentDashboard() {
                       </td>
                     </tr>
                   ) : (
-                    records.map((r, idx) => (
-                      <tr key={r._id || idx} className="hover:bg-slate-800/20 transition-colors">
-                        <td className="py-3 text-slate-300 font-mono text-xs">{r.date}</td>
-                        <td className="py-3 text-slate-200 font-semibold">{r.course_id}</td>
-                        <td className="py-3 text-slate-400 font-mono text-xs">{r.time}</td>
-                        <td className="py-3 text-slate-500">
-                          <span className="text-[10px] uppercase font-mono px-2 py-0.5 bg-slate-800 border border-slate-700/50 rounded-md">
-                            {r.source || "auto"}
-                          </span>
-                        </td>
-                        <td className="py-3 text-right">
-                          <span
-                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                              r.status === "Present"
-                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                            }`}
-                          >
-                            <span className={`w-1.5 h-1.5 rounded-full ${r.status === "Present" ? "bg-emerald-400" : "bg-rose-400"}`} />
-                            {r.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))
+                    records.map((r, idx) => {
+                      const formatted = formatRecordDateTime(r.date, r.time);
+                      return (
+                        <tr key={r._id || idx} className="hover:bg-slate-800/20 transition-colors">
+                          <td className="py-3 text-slate-300 font-mono text-xs">{formatted.date}</td>
+                          <td className="py-3 text-slate-200 font-semibold">{r.course_id}</td>
+                          <td className="py-3 text-slate-400 font-mono text-xs">{formatted.time}</td>
+                          <td className="py-3 text-slate-500">
+                            <span className="text-[10px] uppercase font-mono px-2 py-0.5 bg-slate-800 border border-slate-700/50 rounded-md">
+                              {r.source || "auto"}
+                            </span>
+                          </td>
+                          <td className="py-3 text-right">
+                            <span
+                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                r.status === "Present"
+                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                              }`}
+                            >
+                              <span className={`w-1.5 h-1.5 rounded-full ${r.status === "Present" ? "bg-emerald-400" : "bg-rose-400"}`} />
+                              {r.status}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>

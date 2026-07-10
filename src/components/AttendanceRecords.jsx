@@ -4,6 +4,17 @@ import { api } from "../services/api";
 import ConfirmModal from "./ConfirmModal";
 import { useAuth } from "../context/AuthContext";
 
+export const formatRecordDateTime = (dateStr, timeStr) => {
+  if (!dateStr) return { date: "", time: "" };
+  const parts = dateStr.split("-");
+  const formattedDate = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : dateStr;
+  const formattedTime = !timeStr || timeStr === "00:00:00" ? "--" : timeStr;
+  return {
+    date: formattedDate,
+    time: formattedTime
+  };
+};
+
 export default function AttendanceRecords() {
   const { user } = useAuth();
   const [records, setRecords] = useState([]);
@@ -60,10 +71,10 @@ export default function AttendanceRecords() {
   const exportCSV = () => {
     const header = "student_id,name,course_id,date,time,status,source\n";
     const body = records
-      .map(
-        (r) =>
-          `${r.student_id},${r.student_name},${r.course_id},${r.date},${r.time},${r.status},${r.source ?? "auto"}`,
-      )
+      .map((r) => {
+        const formatted = formatRecordDateTime(r.date, r.time);
+        return `${r.student_id},${r.student_name},${r.course_id},${formatted.date},${formatted.time},${r.status},${r.source ?? "auto"}`;
+      })
       .join("\n");
     const blob = new Blob([header + body], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -154,26 +165,28 @@ export default function AttendanceRecords() {
                 </tr>
               </thead>
               <tbody>
-                {records.map((r) => (
-                  <tr
-                    key={r._id}
-                    className="border-b border-slate-800/60 hover:bg-slate-800/30"
-                  >
-                    <td className="py-2.5 px-3 font-mono text-xs text-slate-300">
-                      {r.student_id}
-                    </td>
-                    <td className="py-2.5 px-3 text-slate-100 font-medium">
-                      {r.student_name}
-                    </td>
-                    <td className="py-2.5 px-3 text-slate-300 font-mono text-xs">
-                      {r.course_id}
-                    </td>
-                    <td className="py-2.5 px-3 text-slate-300 font-mono text-xs">
-                      {r.date}
-                    </td>
-                    <td className="py-2.5 px-3 text-slate-300 font-mono text-xs">
-                      {r.time}
-                    </td>
+                {records.map((r) => {
+                  const formatted = formatRecordDateTime(r.date, r.time);
+                  return (
+                    <tr
+                      key={r._id}
+                      className="border-b border-slate-800/60 hover:bg-slate-800/30"
+                    >
+                      <td className="py-2.5 px-3 font-mono text-xs text-slate-300">
+                        {r.student_id}
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-100 font-medium">
+                        {r.student_name}
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-300 font-mono text-xs">
+                        {r.course_id}
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-300 font-mono text-xs">
+                        {formatted.date}
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-300 font-mono text-xs">
+                        {formatted.time}
+                      </td>
                     <td className="py-2.5 px-3">
                       <span
                         className={`text-[10px] uppercase tracking-wider font-semibold ${
@@ -245,7 +258,7 @@ export default function AttendanceRecords() {
                       </td>
                     )}
                   </tr>
-                ))}
+                )})}
               </tbody>
             </table>
           </div>

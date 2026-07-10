@@ -7,7 +7,9 @@ from pymongo.errors import DuplicateKeyError
 from db import attendance_col, students_col, student_registrations_col
 
 
-def mark_attendance(student_id: str, course_id: str) -> Optional[Dict[str, Any]]:
+def mark_attendance(
+    student_id: str, course_id: str, date: Optional[str] = None, time: Optional[str] = None
+) -> Optional[Dict[str, Any]]:
     """Auto-mark a student as Present for the given course today.
 
     Returns the inserted record dict, or None if a duplicate already exists
@@ -17,8 +19,8 @@ def mark_attendance(student_id: str, course_id: str) -> Optional[Dict[str, Any]]
     record = {
         "student_id": student_id,
         "course_id": course_id,
-        "date": now.strftime("%Y-%m-%d"),
-        "time": now.strftime("%H:%M:%S"),
+        "date": date or now.strftime("%Y-%m-%d"),
+        "time": time or now.strftime("%H:%M:%S"),
         "status": "Present",
         "source": "auto",
     }

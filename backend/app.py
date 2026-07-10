@@ -465,9 +465,11 @@ def mark_attendance_api():
     data = request.get_json(force=True) or {}
     student_id = data.get("student_id")
     course_id = data.get("course_id")
+    date = data.get("date")
+    time = data.get("time")
     if not student_id or not course_id:
         return jsonify({"error": "Missing student_id or course_id"}), 400
-    rec = mark_attendance(student_id, course_id)
+    rec = mark_attendance(student_id, course_id, date, time)
     if rec is None:
         return jsonify({"error": "Attendance already marked for today"}), 409
     return jsonify(rec), 200
