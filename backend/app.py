@@ -113,7 +113,10 @@ def login():
     user = authenticate(data.get("username", ""), data.get("password", ""))
     if not user:
         return jsonify({"error": "Invalid credentials"}), 401
-    return jsonify({"token": make_token(user["username"], user["role"], user.get("student_id")), "user": user})
+    return jsonify({
+        "token": make_token(user["username"], user["role"], user.get("student_id"), user.get("department")),
+        "user": user
+    })
 
 
 @app.route("/api/register-user", methods=["POST"])

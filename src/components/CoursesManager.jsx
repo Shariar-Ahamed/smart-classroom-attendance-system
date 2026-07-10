@@ -81,15 +81,15 @@ export default function CoursesManager() {
     return courses.filter((c) => cleanDept(c.department) === cleanDept(selectedCatalogDept));
   }, [courses, selectedCatalogDept]);
 
-  // Filter students for dropdown based on department selection
+  // Filter students for dropdown - show all students to allow cross-departmental registration
   const filteredStudents = useMemo(() => {
-    return students.filter((s) => cleanDept(s.department) === cleanDept(assignDept));
-  }, [students, assignDept]);
+    return students;
+  }, [students]);
 
-  // Filter faculties for dropdown based on department selection
+  // Filter faculties for dropdown - show all faculties to allow cross-departmental teaching
   const filteredFaculties = useMemo(() => {
-    return faculties.filter((f) => cleanDept(f.department) === cleanDept(assignDept));
-  }, [faculties, assignDept]);
+    return faculties;
+  }, [faculties]);
 
   // Available courses in the selected department for assigning
   const availableDeptCourses = useMemo(() => {
@@ -555,11 +555,11 @@ export default function CoursesManager() {
                       onChange={(val) => setSelectedStudentId(val)}
                       options={filteredStudents.map((s) => ({
                         value: s.student_id,
-                        label: `${s.student_id} — ${s.name}`,
+                        label: `${s.student_id} — ${s.name} (${s.department})`,
                       }))}
                       placeholder={
                         filteredStudents.length === 0
-                          ? "No students registered in this dept"
+                          ? "No registered students found"
                           : "Select student..."
                       }
                       disabled={filteredStudents.length === 0}
@@ -579,11 +579,11 @@ export default function CoursesManager() {
                       onChange={(val) => setSelectedFacultyUsername(val)}
                       options={filteredFaculties.map((f) => ({
                         value: f.username,
-                        label: `${f.username} (${f.full_name})`,
+                        label: `${f.username} — ${f.full_name} (${f.department})`,
                       }))}
                       placeholder={
                         filteredFaculties.length === 0
-                          ? "No faculty profiles in this dept"
+                          ? "No faculty members found"
                           : "Select faculty..."
                       }
                       disabled={filteredFaculties.length === 0}

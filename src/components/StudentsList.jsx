@@ -83,14 +83,23 @@ export default function StudentsList() {
     }
   };
 
-  const filtered = students.filter(
-    (s) =>
-      s.student_id.toLowerCase().includes(q.toLowerCase()) ||
-      s.name.toLowerCase().includes(q.toLowerCase()) ||
+  const cleanDept = (dept) => (dept || "").replace(/^Department of\s+/i, "").trim().toLowerCase();
+
+  const filtered = students.filter((s) => {
+    if (user?.role === "FACULTY" && user?.department) {
+      if (cleanDept(s.department) !== cleanDept(user.department)) {
+        return false;
+      }
+    }
+    const query = q.toLowerCase();
+    return (
+      s.student_id.toLowerCase().includes(query) ||
+      s.name.toLowerCase().includes(query) ||
       (s.section && s.section.toLowerCase() === q.trim().toLowerCase()) ||
-      (s.semester && s.semester.toLowerCase().includes(q.toLowerCase())) ||
-      s.department.toLowerCase().includes(q.toLowerCase()),
-  );
+      (s.semester && s.semester.toLowerCase().includes(query)) ||
+      s.department.toLowerCase().includes(query)
+    );
+  });
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative">
@@ -102,7 +111,7 @@ export default function StudentsList() {
             Student Management
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            {students.length} students enrolled
+            {filtered.length} {user?.role === "FACULTY" ? "department student(s)" : "students"} enrolled
           </p>
         </div>
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import CustomSelect from "./CustomSelect";
 import { api } from "../services/api";
 import ConfirmModal from "./ConfirmModal";
@@ -20,6 +20,7 @@ export default function AttendanceRecords() {
   const { user } = useAuth();
   const [records, setRecords] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [students, setStudents] = useState([]);
   const [date, setDate] = useState("");
   const [course, setCourse] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -40,8 +41,31 @@ export default function AttendanceRecords() {
   };
 
   useEffect(() => {
-    (async () => setCourses(await api.listCourses()))();
+    (async () => {
+      setCourses(await api.listCourses());
+      setStudents(await api.listStudents());
+    })();
   }, []);
+
+  const studentDeptMap = useMemo(() => {
+    const map = new Map();
+    for (const s of students) {
+      map.set(s.student_id, s.department);
+    }
+    return map;
+  }, [students]);
+
+  const cleanDept = (dept) => (dept || "").replace(/^Department of\s+/i, "").trim().toLowerCase();
+
+  const filteredRecords = useMemo(() => {
+    return records.filter((r) => {
+      if (user?.role === "FACULTY" && user?.department) {
+        const studentDept = studentDeptMap.get(r.student_id);
+        return cleanDept(studentDept) === cleanDept(user.department);
+      }
+      return true;
+    });
+  }, [records, studentDeptMap, user]);
 
   useEffect(() => {
     load();
@@ -71,7 +95,7 @@ export default function AttendanceRecords() {
 
   const exportCSV = () => {
     const header = "student_id,name,course_id,date,time,status,source\n";
-    const body = records
+    const body = filteredRecords
       .map((r) => {
         const formatted = formatRecordDateTime(r.date, r.time);
         return `${r.student_id},${r.student_name},${r.course_id},${formatted.date},${formatted.time},${r.status},${r.source ?? "auto"}`;
@@ -93,7 +117,7 @@ export default function AttendanceRecords() {
           <div>
             <h2 className="font-semibold text-slate-100">Attendance Records</h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              GET /api/attendance · {records.length} matching record(s) · click
+              GET /api/attendance · {filteredRecords.length} matching record(s) · click
               status to edit
             </p>
           </div>
@@ -136,7 +160,7 @@ export default function AttendanceRecords() {
             </button>
             <button
               onClick={exportCSV}
-              disabled={records.length === 0}
+              disabled={filteredRecords.length === 0}
               className="px-3 py-1.5 bg-indigo-500 hover:bg-indigo-400 rounded-lg text-sm font-medium disabled:opacity-40 transition"
             >
               ⬇ Export CSV
@@ -144,7 +168,7 @@ export default function AttendanceRecords() {
           </div>
         </div>
 
-        {records.length === 0 ? (
+        {filteredRecords.length === 0 ? (
           <div className="text-center py-12 text-slate-500">
             <div className="text-4xl mb-2">📋</div>
             No records match the filters.
@@ -165,7 +189,7 @@ export default function AttendanceRecords() {
                 </tr>
               </thead>
               <tbody>
-                {records.map((r) => {
+                {filteredRecords.map((r) => {
                   const formatted = formatRecordDateTime(r.date, r.time);
                   return (
                     <tr

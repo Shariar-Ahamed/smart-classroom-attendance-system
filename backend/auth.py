@@ -26,7 +26,7 @@ def verify_password(plain: str, hashed: str) -> bool:
         return False
 
 
-def make_token(username: str, role: str, student_id: Optional[str] = None) -> str:
+def make_token(username: str, role: str, student_id: Optional[str] = None, department: Optional[str] = None) -> str:
     payload = {
         "sub": username,
         "role": role,
@@ -34,6 +34,8 @@ def make_token(username: str, role: str, student_id: Optional[str] = None) -> st
     }
     if student_id:
         payload["student_id"] = student_id
+    if department:
+        payload["department"] = department
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGO)
 
 
@@ -48,7 +50,12 @@ def authenticate(username: str, password: str) -> Optional[dict]:
     user = users_col.find_one({"username": username})
     if not user or not verify_password(password, user["password"]):
         return None
-    res = {"username": user["username"], "role": user["role"]}
+    res = {
+        "username": user["username"],
+        "role": user["role"],
+        "full_name": user.get("full_name", ""),
+        "department": user.get("department", "")
+    }
     if "student_id" in user:
         res["student_id"] = user["student_id"]
     return res
