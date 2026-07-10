@@ -3,6 +3,7 @@ import CustomSelect from "./CustomSelect";
 import { api } from "../services/api";
 import ConfirmModal from "./ConfirmModal";
 import { useAuth } from "../context/AuthContext";
+import CustomDatePicker from "./CustomDatePicker";
 
 export const formatRecordDateTime = (dateStr, timeStr) => {
   if (!dateStr) return { date: "", time: "" };
@@ -97,11 +98,10 @@ export default function AttendanceRecords() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <input
-              type="date"
+            <CustomDatePicker
               value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              onChange={setDate}
+              placeholder="Select date"
             />
             <CustomSelect
               value={course}

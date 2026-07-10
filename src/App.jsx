@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { Menu } from "lucide-react";
 import Login from "./components/Login";
+import { formatOrdinalDate } from "./components/CustomDatePicker";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./components/Dashboard";
 import RegisterStudent from "./components/RegisterStudent";
@@ -58,6 +59,23 @@ function Shell() {
   const { user } = useAuth();
   const [view, setView] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [timeStr, setTimeStr] = useState("");
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, "0");
+      const d = String(now.getDate()).padStart(2, "0");
+      const dateStr = `${y}-${m}-${d}`;
+      const localDate = formatOrdinalDate(dateStr);
+      const localTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      setTimeStr(`${localDate}, ${localTime}`);
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   if (!user) return <Login />;
 
@@ -107,7 +125,7 @@ function Shell() {
               </div>
             </div>
             <div className="text-[10px] lg:text-xs text-slate-500 font-mono max-sm:hidden">
-              {new Date().toLocaleString()}
+              {timeStr}
             </div>
           </div>
         </header>
