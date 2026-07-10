@@ -158,24 +158,47 @@ export default function LiveAttendance() {
             o.name = student.name;
             try {
               const res = await api.markAttendance(o.student_id, course);
+              const time = new Date().toLocaleTimeString();
               if (res) {
                 o.newlyMarked = true;
                 setOverlay([...newOverlay]); // trigger re-render of overlay border colors
 
                 // Log a temporary event feed alert
-                const time = new Date().toLocaleTimeString();
-                setEvents((e) => [
-                  {
-                    id: Math.random().toString(),
-                    student_id: student.student_id,
-                    name: student.name,
-                    time,
-                    status: "Present",
-                    distance: o.distance,
-                  },
-                  ...e.slice(0, 49),
-                ]);
+                setEvents((e) => {
+                  if (e.some((ev) => ev.student_id === student.student_id)) return e;
+                  return [
+                    {
+                      id: Math.random().toString(),
+                      student_id: student.student_id,
+                      name: student.name,
+                      time,
+                      status: "Present",
+                      distance: o.distance,
+                    },
+                    ...e.slice(0, 49),
+                  ];
+                });
                 refreshToday();
+              } else {
+                // If they are in the records already as Present or Absent
+                const existingRecord = records.find((r) => r.student_id === student.student_id);
+                if (existingRecord) {
+                  setEvents((e) => {
+                    if (e.some((ev) => ev.student_id === student.student_id)) return e;
+                    return [
+                      {
+                        id: Math.random().toString(),
+                        student_id: student.student_id,
+                        name: student.name,
+                        time,
+                        status: existingRecord.status,
+                        distance: o.distance,
+                        note: "Already Marked",
+                      },
+                      ...e.slice(0, 49),
+                    ];
+                  });
+                }
               }
             } catch (err) {
               // ignore duplicate marking logs
@@ -437,8 +460,13 @@ export default function LiveAttendance() {
                 >
                   <div className="min-w-0 flex-1 pr-2">
                     <div className="text-sm font-semibold text-slate-100 truncate flex items-center gap-1.5">
-                      <UserCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <UserCheck className={`w-4 h-4 shrink-0 ${ev.note ? "text-indigo-400" : "text-emerald-400"}`} />
                       {ev.name}
+                      {ev.note && (
+                        <span className="text-[9px] font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.2 rounded-full uppercase tracking-wider">
+                          {ev.note}
+                        </span>
+                      )}
                     </div>
                     <div className="text-[10px] text-slate-500 font-mono mt-0.5 flex items-center gap-1.5">
                       <span>{ev.student_id}</span>
