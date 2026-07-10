@@ -1,12 +1,41 @@
-# 🏫 SmartAttend AI - Smart Classroom Attendance System
+<h1 align="center">🏫 SmartAttend AI — Smart Classroom Attendance System 🚀</h1>
+
+<p align="center">
+  <img src="https://i.postimg.cc/zfF24Kw0/image.png" alt="SmartAttend AI Banner">
+</p>
 
 ---
 
-## 📖 Overview
+<p align="center">
+  <img src="https://img.shields.io/badge/SmartAttend-AI%20Attendance-6366f1?style=for-the-badge&logo=google-lens&logoColor=white">
+  <img src="https://img.shields.io/badge/React-v19-61DAFB?style=for-the-badge&logo=react&logoColor=black">
+  <img src="https://img.shields.io/badge/Vite-v7.3.2-646CFF?style=for-the-badge&logo=vite&logoColor=white">
+</p>
 
-**SmartAttend AI** is a modern, privacy-first, and highly automated classroom attendance system. By leveraging computer vision and deep learning, SmartAttend AI replaces outdated manual registers with face detection and recognition.
+<p align="center">
+  <img src="https://img.shields.io/github/license/Shariar-Ahamed/smart-classroom-attendance-system">
+  <img src="https://img.shields.io/github/repo-size/Shariar-Ahamed/smart-classroom-attendance-system">
+  <img src="https://img.shields.io/github/last-commit/Shariar-Ahamed/smart-classroom-attendance-system">
+</p>
 
-The application is built on a split architecture: a sleek, dark-themed, glassmorphic **React (Vite) + Tailwind CSS** frontend dashboard, and a production-grade **Flask + PyMongo + OpenCV** backend that manages face detection, matching threads, database storage, and secure authentication.
+<p align="center">
+  <img src="https://img.shields.io/github/stars/Shariar-Ahamed/smart-classroom-attendance-system?style=social">
+  <img src="https://img.shields.io/github/forks/Shariar-Ahamed/smart-classroom-attendance-system?style=social">
+</p>
+
+<p align="center">
+  <a href="https://wakatime.com/badge/user/c7433bc5-6f12-4c97-baea-430790fa608c/project/4d162b42-7e21-4ae8-9867-594059a2c42f">
+    <img src="https://wakatime.com/badge/user/c7433bc5-6f12-4c97-baea-430790fa608c/project/4d162b42-7e21-4ae8-9867-594059a2c42f.svg" alt="wakatime">
+  </a>
+</p>
+
+---
+
+<p align="center">
+  SmartAttend AI is a premium, high-performance web-based Smart Classroom Attendance System. Built using a <b>React + Vite</b> frontend and a secure <b>Flask + OpenCV</b> backend, it features a gorgeous custom glassmorphic UI, real-time facial recognition (using SSD Mobilenet v1 & YuNet), database activity tracking, role-based access control, and a secure administration panel.
+</p>
+
+> **Live Production Demo**: **[smart-attend-diu.vercel.app](https://smart-attend-diu.vercel.app/)**
 
 ---
 
