@@ -35,6 +35,7 @@ export default function LiveAttendance() {
   const [students, setStudents] = useState([]);
   const [courses, setCourses] = useState([]);
   const [course, setCourse] = useState("");
+  const [records, setRecords] = useState([]);
   const [running, setRunning] = useState(false);
   const [events, setEvents] = useState([]);
   const [todayCount, setTodayCount] = useState(0);
@@ -66,6 +67,7 @@ export default function LiveAttendance() {
     }
     (async () => {
       setStudents(await api.listStudents(course));
+      refreshToday();
     })();
   }, [course]);
 
@@ -85,11 +87,16 @@ export default function LiveAttendance() {
   }, []);
 
   const refreshToday = async () => {
-    const today = new Date().toISOString().slice(0, 10);
-    const all = await api.getAttendance();
-    const todayRecords = all.filter((r) => r.date === today);
-    const uniq = new Set(todayRecords.map((r) => r.student_id)).size;
-    setTodayCount(uniq);
+    if (!course) return;
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const courseRecords = await api.getAttendance({ date: today, course_id: course });
+      setRecords(courseRecords);
+      const uniq = new Set(courseRecords.map((r) => r.student_id)).size;
+      setTodayCount(uniq);
+    } catch (err) {
+      console.error("Failed to refresh today's scan records:", err);
+    }
   };
 
   const handleStart = async () => {
