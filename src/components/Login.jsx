@@ -258,7 +258,7 @@ export default function Login() {
                     onClick={() => switchMode("register")}
                     className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold text-slate-300 transition duration-300 cursor-pointer"
                   >
-                    Register / Create Account
+                    Create Account
                   </motion.button>
                 </div>
               </motion.form>
