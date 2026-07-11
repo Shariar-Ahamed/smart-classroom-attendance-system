@@ -20,17 +20,38 @@ import {
   Zap,
   Search,
   GraduationCap,
-  BookOpen
+  BookOpen,
+  Video,
+  Edit,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 
-export default function Dashboard() {
+export default function Dashboard({ setView, setActiveCourseId }) {
   const { user } = useAuth();
+  
+  const handleStartScanner = (courseId) => {
+    if (setActiveCourseId) setActiveCourseId(courseId);
+    if (setView) setView("live");
+  };
+
+  const handleManualEntry = (courseId) => {
+    if (setActiveCourseId) setActiveCourseId(courseId);
+    if (setView) setView("manual");
+  };
   const [students, setStudents] = useState([]);
   const [records, setRecords] = useState([]);
   const [registrations, setRegistrations] = useState([]);
   const [summarySearch, setSummarySearch] = useState("");
   const [courses, setCourses] = useState([]);
   const [faculties, setFaculties] = useState([]);
+  const [activityDate, setActivityDate] = useState(new Date().toISOString().slice(0, 10));
+
+  const shiftActivityDate = (days) => {
+    const current = new Date(activityDate);
+    current.setDate(current.getDate() + days);
+    setActivityDate(current.toISOString().slice(0, 10));
+  };
 
   useEffect(() => {
     (async () => {
@@ -178,6 +199,28 @@ export default function Dashboard() {
     }
   };
 
+  const facultyCourses = useMemo(() => {
+    if (user?.role !== "FACULTY") return [];
+    return courses.map((c) => {
+      const courseRecords = records.filter((r) => r.course_id === c.course_id);
+      const enrolledIds = new Set(
+        registrations
+          .filter((reg) => reg.course_ids.includes(c.course_id))
+          .map((reg) => reg.student_id)
+      );
+      const enrolledCount = enrolledIds.size;
+      const uniqueDates = new Set(courseRecords.map((r) => r.date)).size;
+      const totalExpected = enrolledCount * uniqueDates;
+      const totalPresent = courseRecords.filter((r) => r.status === "Present").length;
+      const attendanceRate = totalExpected === 0 ? 0 : Math.round((totalPresent / totalExpected) * 100);
+      return {
+        ...c,
+        enrolledCount,
+        attendanceRate,
+      };
+    });
+  }, [courses, records, registrations, user]);
+
   const deptStats = useMemo(() => {
     const uniqueDepts = Array.from(new Set(students.map((s) => s.department).filter(Boolean)));
     const todayStudentIds = new Set(todayRecords.map((r) => r.student_id));
@@ -199,6 +242,10 @@ export default function Dashboard() {
   const riskWatchlist = useMemo(() => {
     return summary.filter((s) => s.pct < 75);
   }, [summary]);
+
+  const activityRecords = useMemo(() => {
+    return records.filter((r) => r.date === activityDate);
+  }, [records, activityDate]);
 
   const maxBar = Math.max(...last7.map((d) => d.count), 1);
 
@@ -446,7 +493,7 @@ export default function Dashboard() {
             </div>
           </motion.div>
         ) : (
-          /* Bar chart */
+          /* Faculty Assigned Courses Grid Hub */
           <motion.div
             variants={itemVariants}
             className="lg:col-span-2 glass-panel rounded-2xl p-5 border border-slate-800/80 shadow-lg relative overflow-hidden"
@@ -454,42 +501,89 @@ export default function Dashboard() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="font-semibold text-slate-100 flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-indigo-400" />
-                  Daily Attendance — Last 7 Days
+                  <BookOpen className="w-4 h-4 text-indigo-400" />
+                  My Assigned Courses
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  Unique students marked Present per day
+                  Active courses and attendance controls
                 </p>
               </div>
             </div>
-            <div className="flex items-end justify-between gap-3 h-48 pt-4">
-              {last7.map((d) => (
-                <div
-                  key={d.date}
-                  className="flex-1 flex flex-col items-center justify-end gap-2 group"
-                >
-                  <div className="text-xs font-semibold text-indigo-300 font-mono opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    {d.count}
-                  </div>
-                  <div className="w-full bg-slate-800/50 rounded-t-lg h-full flex items-end overflow-hidden">
-                    <motion.div
-                      initial={{ height: 0 }}
-                      animate={{ height: `${(d.count / maxBar) * 100}%` }}
-                      transition={{ type: "spring", stiffness: 80, delay: 0.1 }}
-                      className="w-full bg-gradient-to-t from-blue-500/80 via-indigo-500 to-purple-600 rounded-t-lg shadow-lg shadow-indigo-500/25 min-h-[4px]"
-                    />
-                  </div>
-                  <div className="text-[10px] text-slate-400 font-semibold font-mono mt-1">
-                    {d.date.slice(5)}
-                  </div>
-                  <div className="text-[9px] text-slate-500 font-mono">{d.pct}%</div>
+            
+            <div className="grid sm:grid-cols-2 gap-4 max-h-[220px] overflow-y-auto pr-1">
+              {facultyCourses.length === 0 ? (
+                <div className="sm:col-span-2 text-sm text-slate-505 text-center py-12 italic">
+                  No courses assigned to your profile.
                 </div>
-              ))}
+              ) : (
+                facultyCourses.map((c) => (
+                  <div
+                    key={c.course_id}
+                    className="p-4 rounded-xl bg-slate-950/40 border border-slate-900/60 hover:border-slate-850/60 hover:bg-slate-900/10 transition duration-300 flex items-center justify-between gap-4"
+                  >
+                    <div className="min-w-0">
+                      <h4 className="font-bold text-sm text-slate-200 truncate group-hover:text-white transition">
+                        {c.course_name}
+                      </h4>
+                      <p className="text-[10px] text-slate-500 font-mono mt-0.5">
+                        {c.course_id} · Sem {c.semester}
+                      </p>
+                      
+                      <div className="flex items-center gap-2 mt-3.5">
+                        <button
+                          onClick={() => handleStartScanner(c.course_id)}
+                          className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-2 py-1 rounded-lg border border-emerald-500/20 transition cursor-pointer"
+                        >
+                          <Video className="w-3 h-3" />
+                          Scanner
+                        </button>
+                        <button
+                          onClick={() => handleManualEntry(c.course_id)}
+                          className="flex items-center gap-1.5 text-[10px] font-bold text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 px-2 py-1 rounded-lg border border-indigo-500/20 transition cursor-pointer"
+                        >
+                          <Edit className="w-3 h-3" />
+                          Manual
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Radial Progress Ring */}
+                    <div className="relative w-16 h-16 shrink-0 flex items-center justify-center">
+                      <svg className="w-full h-full transform -rotate-90">
+                        <circle
+                          cx="32"
+                          cy="32"
+                          r="26"
+                          className="text-slate-850"
+                          strokeWidth="3.5"
+                          stroke="currentColor"
+                          fill="transparent"
+                        />
+                        <circle
+                          cx="32"
+                          cy="32"
+                          r="26"
+                          className="text-indigo-500"
+                          strokeWidth="3.5"
+                          strokeDasharray={2 * Math.PI * 26}
+                          strokeDashoffset={2 * Math.PI * 26 * (1 - c.attendanceRate / 100)}
+                          strokeLinecap="round"
+                          stroke="currentColor"
+                          fill="transparent"
+                        />
+                      </svg>
+                      <span className="absolute text-[10px] font-bold text-slate-350 font-mono">
+                        {c.attendanceRate}%
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </motion.div>
         )}
 
-        {/* Today's table */}
+        {/* Daily/Today's Activity table */}
         <motion.div
           variants={itemVariants}
           className="glass-panel rounded-2xl p-5 border border-slate-800/80 shadow-lg"
@@ -497,21 +591,35 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-slate-100 flex items-center gap-2">
               <Clock className="w-4.5 h-4.5 text-purple-400" />
-              Today's Activity
+              {activityDate === today ? "Today's Activity" : "Daily Activity"}
             </h3>
-            <span className="text-[10px] font-bold text-slate-500 bg-slate-800/40 px-2 py-0.5 rounded-full border border-slate-800">
-              {today}
-            </span>
+            <div className="flex items-center gap-1 bg-slate-950/60 border border-slate-900 px-2 py-0.5 rounded-full">
+              <button
+                onClick={() => shiftActivityDate(-1)}
+                className="p-0.5 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-full transition cursor-pointer"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-[10px] font-bold text-slate-300 font-mono px-1">
+                {activityDate.split("-").reverse().join("-")}
+              </span>
+              <button
+                onClick={() => shiftActivityDate(1)}
+                className="p-0.5 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-full transition cursor-pointer"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
           <div className="space-y-2.5 max-h-64 overflow-y-auto pr-1">
-            {todayRecords.length === 0 && (
+            {activityRecords.length === 0 && (
               <div className="text-sm text-slate-500 text-center py-12 flex flex-col items-center gap-2">
                 <AlertCircle className="w-8 h-8 text-slate-600 animate-bounce" />
-                No attendance recorded today.
+                No attendance recorded for this date.
               </div>
             )}
-            {todayRecords.slice(0, 20).map((r, idx) => {
-              const isFirst = idx === 0 && isRecentCheckIn(r.time);
+            {activityRecords.slice(0, 20).map((r, idx) => {
+              const isFirst = idx === 0 && activityDate === today && isRecentCheckIn(r.time);
               const sourceLabel = r.source === "manual" ? "MANUAL ✍️" : "AUTO 🤖";
               const sourceColor = r.source === "manual" ? "text-blue-400 bg-blue-500/10 border-blue-500/10" : "text-indigo-400 bg-indigo-500/10 border-indigo-500/10";
               const initials = getInitials(r.student_name);

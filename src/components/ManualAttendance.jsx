@@ -12,10 +12,10 @@ import ConfirmModal from "./ConfirmModal";
  * The row state is upserted, so manually marking overrides any prior
  * auto-recognition record for the same (student, course, date).
  */
-export default function ManualAttendance() {
+export default function ManualAttendance({ initialCourseId }) {
   const [students, setStudents] = useState([]);
   const [courses, setCourses] = useState([]);
-  const [course, setCourse] = useState("all");
+  const [course, setCourse] = useState(initialCourseId || "all");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [records, setRecords] = useState([]);
   const [q, setQ] = useState("");
@@ -53,8 +53,11 @@ export default function ManualAttendance() {
     (async () => {
       const cList = await api.listCourses();
       setCourses(cList);
+      if (initialCourseId && cList.some((c) => c.course_id === initialCourseId)) {
+        setCourse(initialCourseId);
+      }
     })();
-  }, []);
+  }, [initialCourseId]);
 
   useEffect(() => {
     if (courses.length > 0 || course !== "all") {

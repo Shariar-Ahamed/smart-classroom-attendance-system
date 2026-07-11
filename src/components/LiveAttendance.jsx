@@ -31,7 +31,7 @@ const MATCH_THRESHOLD = 0.55;
 // How often to run a recognition pass (TICK_MS = 500 ms = roughly 2 fps)
 const TICK_MS = 500;
 
-export default function LiveAttendance() {
+export default function LiveAttendance({ initialCourseId }) {
   const { videoRef, ready, error: webcamError, start, stop } = useWebcam();
   const [students, setStudents] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -55,7 +55,9 @@ export default function LiveAttendance() {
     (async () => {
       const cList = await api.listCourses();
       setCourses(cList);
-      if (cList.length > 0) {
+      if (initialCourseId && cList.some((c) => c.course_id === initialCourseId)) {
+        setCourse(initialCourseId);
+      } else if (cList.length > 0) {
         setCourse(cList[0].course_id);
       }
       refreshToday();

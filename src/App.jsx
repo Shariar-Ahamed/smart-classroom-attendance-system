@@ -60,6 +60,7 @@ function Shell() {
   const [view, setView] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [timeStr, setTimeStr] = useState("");
+  const [activeCourseId, setActiveCourseId] = useState("");
 
   useEffect(() => {
     const updateTime = () => {
@@ -130,10 +131,10 @@ function Shell() {
           </div>
         </header>
         <div className="p-4 lg:p-8 flex-1">
-          {safeView === "dashboard" && <Dashboard />}
-          {safeView === "live" && user.role === "FACULTY" && <LiveAttendance />}
+          {safeView === "dashboard" && <Dashboard setView={setView} setActiveCourseId={setActiveCourseId} />}
+          {safeView === "live" && user.role === "FACULTY" && <LiveAttendance initialCourseId={activeCourseId} />}
           {safeView === "manual" && user.role === "FACULTY" && (
-            <ManualAttendance />
+            <ManualAttendance initialCourseId={activeCourseId} />
           )}
           {safeView === "my-courses" && user.role === "FACULTY" && (
             <FacultyCourses />
