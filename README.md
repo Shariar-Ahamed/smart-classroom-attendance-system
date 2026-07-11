@@ -13,6 +13,18 @@
 </p>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/Python-v3.10-3776AB?style=for-the-badge&logo=python&logoColor=white">
+  <img src="https://img.shields.io/badge/Flask-v3.0-000000?style=for-the-badge&logo=flask&logoColor=white">
+  <img src="https://img.shields.io/badge/OpenCV-YuNet-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white">
+  <img src="https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Vercel-Frontend-000000?style=for-the-badge&logo=vercel&logoColor=white">
+  <img src="https://img.shields.io/badge/Render-Backend-46E3B7?style=for-the-badge&logo=render&logoColor=black">
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/github/license/Shariar-Ahamed/smart-classroom-attendance-system">
   <img src="https://img.shields.io/github/repo-size/Shariar-Ahamed/smart-classroom-attendance-system">
   <img src="https://img.shields.io/github/last-commit/Shariar-Ahamed/smart-classroom-attendance-system">
