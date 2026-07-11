@@ -25,7 +25,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/license/Shariar-Ahamed/smart-classroom-attendance-system">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-6366f1"></a>
   <img src="https://img.shields.io/github/repo-size/Shariar-Ahamed/smart-classroom-attendance-system">
   <img src="https://img.shields.io/github/last-commit/Shariar-Ahamed/smart-classroom-attendance-system">
 </p>
