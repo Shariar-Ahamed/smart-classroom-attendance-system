@@ -93,19 +93,317 @@ export default function AttendanceRecords() {
     }
   };
 
-  const exportCSV = () => {
-    const header = "student_id,name,course_id,date,time,status,source\n";
-    const body = filteredRecords
-      .map((r) => {
-        const formatted = formatRecordDateTime(r.date, r.time);
-        return `${r.student_id},${r.student_name},${r.course_id},${formatted.date},${formatted.time},${r.status},${r.source ?? "auto"}`;
-      })
-      .join("\n");
-    const blob = new Blob([header + body], { type: "text/csv" });
+  const exportPDF = () => {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Please allow popups to download PDF reports.");
+      return;
+    }
+    
+    const formattedDate = new Date().toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+
+    const coursePart = course ? course.replace(/[^a-zA-Z0-9]/g, "_") : "All_Courses";
+    const datePart = date ? date.replace(/[^a-zA-Z0-9]/g, "_") : "All_Dates";
+    const title = `DIU_Attendance_${coursePart}_${datePart}`;
+
+    const htmlContent = `
+      <html>
+        <head>
+          <title>${title}</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+            body {
+              font-family: 'Outfit', sans-serif;
+              color: #0f172a;
+              padding: 30px;
+              margin: 0;
+              background-color: #ffffff;
+            }
+            .header {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              border-bottom: 2px solid #f1f5f9;
+              padding-bottom: 16px;
+              margin-bottom: 24px;
+            }
+            .logo-area {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+            }
+            .logo-img {
+              height: 48px;
+              width: auto;
+            }
+            .brand-title {
+              margin: 0;
+              font-size: 15px;
+              font-weight: 700;
+              color: #0f172a;
+            }
+            .brand-subtitle {
+              font-size: 10px;
+              color: #64748b;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+            .title-area {
+              text-align: right;
+            }
+            .title-area h1 {
+              font-size: 18px;
+              margin: 0;
+              color: #0f766e;
+              font-weight: 700;
+              letter-spacing: -0.5px;
+            }
+            .title-area p {
+              font-size: 10px;
+              margin: 3px 0 0 0;
+              color: #64748b;
+              font-weight: 500;
+            }
+            .meta-grid {
+              display: grid;
+              grid-template-columns: repeat(4, 1fr);
+              gap: 12px;
+              background: #f8fafc;
+              border: 1px solid #e2e8f0;
+              border-radius: 10px;
+              padding: 12px;
+              margin-bottom: 24px;
+              font-size: 11px;
+            }
+            .meta-item span {
+              display: block;
+              color: #64748b;
+              font-size: 9px;
+              font-weight: 600;
+              text-transform: uppercase;
+              margin-bottom: 2px;
+            }
+            .meta-item strong {
+              color: #0f172a;
+              font-size: 12px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 5px;
+              font-size: 11px;
+            }
+            th {
+              background: #f1f5f9;
+              color: #475569;
+              font-weight: 600;
+              text-align: left;
+              padding: 8px 10px;
+              border-bottom: 2px solid #cbd5e1;
+              text-transform: uppercase;
+              font-size: 9px;
+              letter-spacing: 0.5px;
+            }
+            td {
+              padding: 8px 10px;
+              border-bottom: 1px solid #e2e8f0;
+              color: #334155;
+            }
+            tr:nth-child(even) {
+              background: #f8fafc;
+            }
+            .badge {
+              display: inline-flex;
+              align-items: center;
+              padding: 2px 8px;
+              border-radius: 9999px;
+              font-size: 9px;
+              font-weight: 600;
+              text-transform: uppercase;
+            }
+            .badge-present {
+              background: #dcfce7;
+              color: #15803d;
+            }
+            .badge-absent {
+              background: #fee2e2;
+              color: #b91c1c;
+            }
+            .footer {
+              margin-top: 40px;
+              border-top: 1px solid #e2e8f0;
+              padding-top: 15px;
+              font-size: 9px;
+              color: #64748b;
+              text-align: center;
+              line-height: 1.4;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="logo-area">
+              <img src="${window.location.origin}/src/assets/DIU-Single-Logo.png" class="logo-img" alt="DIU Logo" />
+              <div>
+                <h2 class="brand-title">Daffodil International University</h2>
+                <span class="brand-subtitle">Smart Attend AI System</span>
+              </div>
+            </div>
+            <div class="title-area">
+              <h1>ATTENDANCE REPORT</h1>
+              <p>Generated on ${formattedDate}</p>
+            </div>
+          </div>
+
+          <div class="meta-grid">
+            <div class="meta-item">
+              <span>Course Code</span>
+              <strong>${course || "All Courses"}</strong>
+            </div>
+            <div class="meta-item">
+              <span>Date Filter</span>
+              <strong>${date || "All Dates"}</strong>
+            </div>
+            <div class="meta-item">
+              <span>Attendance Status</span>
+              <strong>${statusFilter === "all" ? "All Statuses" : statusFilter}</strong>
+            </div>
+            <div class="meta-item">
+              <span>Records Count</span>
+              <strong>${filteredRecords.length} student(s)</strong>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Student ID</th>
+                <th>Student Name</th>
+                <th>Course ID</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredRecords.map(r => {
+                const formatted = formatRecordDateTime(r.date, r.time);
+                const statusBadgeClass = r.status === 'Present' ? 'badge-present' : 'badge-absent';
+                return `
+                  <tr>
+                    <td style="font-family: monospace; font-weight: 500;">${r.student_id}</td>
+                    <td><strong>${r.student_name}</strong></td>
+                    <td style="font-family: monospace;">${r.course_id}</td>
+                    <td>${formatted.date}</td>
+                    <td>${formatted.time}</td>
+                    <td><span class="badge ${statusBadgeClass}">${r.status}</span></td>
+                    <td style="text-transform: uppercase; font-size: 9px; color: #64748b;">${r.source || 'auto'}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+
+          <div class="footer">
+            <p>Smart Attend System © ${new Date().getFullYear()} Daffodil International University. All rights reserved.</p>
+            <p style="font-size: 8px; margin-top: 3px; color: #94a3b8;">This report compiles automated biometric scans and manual supervisor check-ins.</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    printWindow.document.title = title;
+
+    setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }, 500);
+  };
+
+  const exportExcel = () => {
+    const formattedDate = new Date().toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+
+    const tableHtml = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+          <!--[if gte mso 9]>
+          <xml>
+            <x:ExcelWorkbook>
+              <x:ExcelWorksheets>
+                <x:ExcelWorksheet>
+                  <x:Name>Attendance Report</x:Name>
+                  <x:WorksheetOptions>
+                    <x:DisplayGridlines/>
+                  </x:WorksheetOptions>
+                </x:ExcelWorksheet>
+              </x:ExcelWorksheets>
+            </x:ExcelWorkbook>
+          </xml>
+          <![endif]-->
+          <style>
+            table { border-collapse: collapse; width: 100%; }
+            th { background-color: #0f766e; color: white; font-weight: bold; font-family: Calibri, sans-serif; font-size: 11pt; text-align: left; }
+            td, th { border: 1px solid #cbd5e1; padding: 6px 12px; font-family: Calibri, sans-serif; font-size: 10pt; }
+            .title { font-family: Calibri, sans-serif; font-size: 16pt; font-weight: bold; color: #0f766e; }
+            .subtitle { font-family: Calibri, sans-serif; font-size: 10pt; color: #64748b; margin-bottom: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="title">Daffodil International University</div>
+          <div class="subtitle">Smart Attend AI System - Attendance Report (Generated on ${formattedDate})</div>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>Student ID</th>
+                <th>Student Name</th>
+                <th>Course ID</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredRecords.map(r => {
+                const formatted = formatRecordDateTime(r.date, r.time);
+                return `
+                  <tr>
+                    <td style="mso-number-format:'\\@';">${r.student_id}</td>
+                    <td><b>${r.student_name}</b></td>
+                    <td>${r.course_id}</td>
+                    <td>${formatted.date}</td>
+                    <td>${formatted.time}</td>
+                    <td style="color: ${r.status === 'Present' ? '#15803d' : '#b91c1c'}; font-weight: bold;">${r.status}</td>
+                    <td style="text-transform: uppercase;">${r.source || 'auto'}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    const blob = new Blob([tableHtml], { type: "application/vnd.ms-excel" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `attendance_${Date.now()}.csv`;
+    const coursePart = course ? course.replace(/[^a-zA-Z0-9]/g, "_") : "All_Courses";
+    const datePart = date ? date.replace(/[^a-zA-Z0-9]/g, "_") : "All_Dates";
+    a.download = `DIU_Attendance_${coursePart}_${datePart}.xls`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -159,11 +457,18 @@ export default function AttendanceRecords() {
               Reset
             </button>
             <button
-              onClick={exportCSV}
+              onClick={exportPDF}
               disabled={filteredRecords.length === 0}
-              className="px-3 py-1.5 bg-indigo-500 hover:bg-indigo-400 rounded-lg text-sm font-medium disabled:opacity-40 transition"
+              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-sm font-medium disabled:opacity-40 transition flex items-center gap-1.5 text-white"
             >
-              ⬇ Export CSV
+              📄 Export PDF
+            </button>
+            <button
+              onClick={exportExcel}
+              disabled={filteredRecords.length === 0}
+              className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-medium disabled:opacity-40 transition flex items-center gap-1.5 text-white"
+            >
+              📊 Export Excel
             </button>
           </div>
         </div>
