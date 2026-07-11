@@ -3,6 +3,7 @@ import CustomSelect from "./CustomSelect";
 import { DEPARTMENTS } from "../constants/departments";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
+import diuSingleLogo from "../assets/DIU-Single-Logo.png";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   GraduationCap,
@@ -133,9 +134,13 @@ export default function Login() {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 100 }}
-            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg shadow-blue-500/30 mb-4 border border-blue-400/20"
+            className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white/5 shadow-lg shadow-indigo-500/10 mb-4 border border-slate-800/80 p-2.5 overflow-hidden"
           >
-            <GraduationCap className="w-8 h-8 text-white" />
+            <img 
+              src={diuSingleLogo} 
+              alt="Daffodil International University Crest" 
+              className="w-full h-full object-contain"
+            />
           </motion.div>
           <motion.h1
             initial={{ y: -10, opacity: 0 }}
@@ -143,7 +148,7 @@ export default function Login() {
             transition={{ delay: 0.1 }}
             className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-200 via-white to-purple-200"
           >
-            SmartAttend AI
+            Smart Attend AI
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}

@@ -15,6 +15,7 @@ import CoursesManager from "./components/CoursesManager";
 import FacultiesManager from "./components/FacultiesManager";
 import FacultyCourses from "./components/FacultyCourses";
 import Footer from "./components/Footer";
+import diuSingleLogo from "./assets/DIU-Single-Logo.png";
 
 const VIEW_META = {
   dashboard: {
@@ -125,8 +126,17 @@ function Shell() {
                 )}
               </div>
             </div>
-            <div className="text-[10px] lg:text-xs text-slate-500 font-mono max-sm:hidden">
-              {timeStr}
+            <div className="flex items-center gap-3.5">
+              <div className="text-[10px] lg:text-xs text-slate-300 font-semibold font-mono max-sm:hidden">
+                {timeStr}
+              </div>
+              <div className="w-8.5 h-8.5 rounded-lg bg-slate-950/80 border border-slate-850 flex items-center justify-center p-1 overflow-hidden shrink-0 shadow-md">
+                <img 
+                  src={diuSingleLogo} 
+                  alt="DIU Logo" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
             </div>
           </div>
         </header>

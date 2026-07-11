@@ -14,6 +14,8 @@ import {
   X
 } from "lucide-react";
 
+import diuFullNameLogo from "../assets/DIU- Full-Name-Logo.png";
+
 const ALL_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "live", label: "Live Attendance", icon: Video, faculty: true },
@@ -50,31 +52,44 @@ export default function Sidebar({ view, setView, isOpen = false, onClose }) {
         }`}
       >
         {/* Brand Header */}
-        <div className="px-6 py-6 border-b border-slate-900 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="px-6 py-5 border-b border-slate-900 flex flex-col gap-4.5">
+          {/* DIU Institution Full Name Logo & Close Button */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex-1 px-2.5 py-2 bg-white/5 border border-white/5 rounded-xl flex items-center justify-center overflow-hidden">
+              <img 
+                src={diuFullNameLogo} 
+                alt="Daffodil International University Logo" 
+                className="h-9 object-contain brightness-100 filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.05)]"
+              />
+            </div>
+            
+            {/* Close button on mobile */}
+            <button
+              onClick={onClose}
+              className="lg:hidden p-1.5 hover:bg-slate-900 text-slate-400 hover:text-slate-200 rounded-lg transition shrink-0 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* SmartAttend AI Attendance branding */}
+          <div className="flex items-center gap-3.5 p-3 rounded-2xl bg-slate-900/40 border border-slate-900/80 shadow-md">
             <motion.div
               whileHover={{ scale: 1.05, rotate: [0, -5, 5, 0] }}
-              className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25 border border-indigo-400/20"
+              className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 border border-indigo-400/20"
             >
               <GraduationCap className="w-5.5 h-5.5 text-white" />
             </motion.div>
             <div>
-              <div className="font-bold text-slate-100 text-base tracking-wide">
-                SmartAttend
+              <div className="font-bold text-slate-100 text-sm tracking-wide">
+                Smart Attend
               </div>
-              <div className="text-[9px] text-indigo-400 font-extrabold uppercase tracking-widest mt-0.5 animate-pulse">
+              <div className="text-[8px] text-emerald-400 font-extrabold uppercase tracking-widest mt-0.5 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 AI Attendance
               </div>
             </div>
           </div>
-
-          {/* Close button on mobile */}
-          <button
-            onClick={onClose}
-            className="lg:hidden p-1.5 hover:bg-slate-900 text-slate-400 hover:text-slate-200 rounded-lg transition shrink-0 cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
         </div>
 
         {/* Navigation list with animated sliding background pill and vertical glowing indicators */}
@@ -116,7 +131,7 @@ export default function Sidebar({ view, setView, isOpen = false, onClose }) {
                   animate={{ scale: isActive ? 1.08 : 1 }}
                   className="shrink-0"
                 >
-                  <Icon className={`w-4.5 h-4.5 transition-colors duration-300 ${isActive ? "text-indigo-400" : "text-slate-500 group-hover:text-slate-300"}`} />
+                  <Icon className={`w-4.5 h-4.5 transition-colors duration-300 ${isActive ? "text-indigo-400" : "text-slate-400 group-hover:text-slate-200"}`} />
                 </motion.div>
 
                 <span className="flex-1 text-left">{item.label}</span>

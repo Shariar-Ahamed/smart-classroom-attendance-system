@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
 import { formatRecordDateTime } from "./AttendanceRecords";
+import diuSingleLogo from "../assets/DIU-Single-Logo.png";
+import Footer from "./Footer";
 
 export default function StudentDashboard() {
   const { logout } = useAuth();
@@ -100,12 +102,16 @@ export default function StudentDashboard() {
       <header className="px-6 lg:px-8 py-5 border-b border-slate-900 bg-slate-900/30 backdrop-blur sticky top-0 z-10">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xl shadow-lg shadow-indigo-500/20">
-              🎓
+            <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center p-1 overflow-hidden shrink-0 shadow-lg shadow-indigo-500/10">
+              <img 
+                src={diuSingleLogo} 
+                alt="DIU Logo" 
+                className="w-full h-full object-contain"
+              />
             </div>
             <div>
-              <h1 className="text-lg font-bold tracking-tight">SmartAttend AI</h1>
-              <p className="text-[10px] text-slate-500 uppercase tracking-widest">Student Portal</p>
+              <h1 className="text-lg font-bold tracking-tight">Smart Attend AI</h1>
+              <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest">Student Portal</p>
             </div>
           </div>
           <button
@@ -152,19 +158,19 @@ export default function StudentDashboard() {
 
             <div className="relative grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-800/60 text-sm">
               <div>
-                <span className="block text-xs text-slate-500">Department</span>
+                <span className="block text-xs text-slate-400 font-medium">Department</span>
                 <span className="font-medium text-slate-200 mt-0.5 block">{profile?.department}</span>
               </div>
               <div>
-                <span className="block text-xs text-slate-500">Batch & Section</span>
+                <span className="block text-xs text-slate-400 font-medium">Batch & Section</span>
                 <span className="font-medium text-slate-200 mt-0.5 block">{profile?.batch} (Sec {profile?.section || "A"})</span>
               </div>
               <div>
-                <span className="block text-xs text-slate-500">Semester</span>
+                <span className="block text-xs text-slate-400 font-medium">Semester</span>
                 <span className="font-medium text-slate-200 mt-0.5 block">{profile?.semester || "N/A"}</span>
               </div>
               <div>
-                <span className="block text-xs text-slate-500">Enrolled Since</span>
+                <span className="block text-xs text-slate-400 font-medium">Enrolled Since</span>
                 <span className="font-medium text-slate-200 mt-0.5 block">
                   {profile?.created_at ? new Date(profile.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A"}
                 </span>
@@ -210,12 +216,12 @@ export default function StudentDashboard() {
             <div className="flex-1 overflow-x-auto">
               <table className="w-full text-left text-sm border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-800 text-xs text-slate-500 uppercase">
-                    <th className="pb-3 font-medium">Date</th>
-                    <th className="pb-3 font-medium">Course ID</th>
-                    <th className="pb-3 font-medium">Time</th>
-                    <th className="pb-3 font-medium">Source</th>
-                    <th className="pb-3 text-right font-medium">Status</th>
+                  <tr className="border-b border-slate-800 text-xs text-slate-400 font-bold uppercase">
+                    <th className="pb-3 font-semibold">Date</th>
+                    <th className="pb-3 font-semibold">Course ID</th>
+                    <th className="pb-3 font-semibold">Time</th>
+                    <th className="pb-3 font-semibold">Source</th>
+                    <th className="pb-3 text-right font-semibold">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/40">
@@ -232,8 +238,8 @@ export default function StudentDashboard() {
                         <tr key={r._id || idx} className="hover:bg-slate-800/20 transition-colors">
                           <td className="py-3 text-slate-300 font-mono text-xs">{formatted.date}</td>
                           <td className="py-3 text-slate-200 font-semibold">{r.course_id}</td>
-                          <td className="py-3 text-slate-400 font-mono text-xs">{formatted.time}</td>
-                          <td className="py-3 text-slate-500">
+                          <td className="py-3 text-slate-300 font-mono text-xs">{formatted.time}</td>
+                          <td className="py-3 text-slate-400">
                             <span className="text-[10px] uppercase font-mono px-2 py-0.5 bg-slate-800 border border-slate-700/50 rounded-md">
                               {r.source || "auto"}
                             </span>
@@ -284,8 +290,8 @@ export default function StudentDashboard() {
                           <span className="text-white font-semibold">{data.present}</span>/{data.total} presents · <span className="font-bold text-white font-mono">{rate}%</span>
                         </span>
                       </div>
-                      <div className="text-[10px] text-slate-500">
-                        Instructor: <span className="text-indigo-400 font-medium">{data.instructor}</span>
+                      <div className="text-[10px] text-slate-400 font-medium">
+                        Instructor: <span className="text-indigo-400 font-semibold">{data.instructor}</span>
                       </div>
                       
                       {/* styled horizontal progress bar */}
@@ -302,16 +308,17 @@ export default function StudentDashboard() {
             )}
 
             {/* Attendance Guideline Alert */}
-            <div className="pt-4 border-t border-slate-800/50 text-[11px] text-slate-500 space-y-1.5">
-              <div className="font-semibold text-slate-400 text-xs">Academic Guidelines</div>
-              <p>📌 High performance (<span className="text-emerald-400 font-semibold">&gt;=75%</span>) is required for course exam registration eligibility.</p>
-              <p>⚠️ Attendance rates falling below <span className="text-rose-400 font-semibold">60%</span> will trigger warning notices.</p>
+            <div className="pt-4 border-t border-slate-800/50 text-[11px] text-slate-400 font-medium space-y-1.5">
+              <div className="font-bold text-slate-300 text-xs">Academic Guidelines</div>
+              <p>📌 High performance (<span className="text-emerald-400 font-bold">&gt;=75%</span>) is required for course exam registration eligibility.</p>
+              <p>⚠️ Attendance rates falling below <span className="text-rose-400 font-bold">60%</span> will trigger warning notices.</p>
             </div>
           </div>
 
         </div>
 
       </main>
+      <Footer />
     </div>
   );
 }
