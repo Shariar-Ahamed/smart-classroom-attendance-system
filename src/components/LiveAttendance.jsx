@@ -228,7 +228,7 @@ export default function LiveAttendance({ initialCourseId }) {
               );
 
               setEvents((e) => {
-                if (e.some((ev) => ev.student_id === student.student_id && ev.note === "Not Enrolled")) return e;
+                if (e.some((ev) => ev.student_id === student.student_id && ev.course_id === course && ev.note === "Not Enrolled")) return e;
                 return [
                   {
                     id: Math.random().toString(),
@@ -238,6 +238,7 @@ export default function LiveAttendance({ initialCourseId }) {
                     status: "Absent",
                     distance: o.distance,
                     note: "Not Enrolled",
+                    course_id: course,
                   },
                   ...e.slice(0, 49),
                 ];
@@ -263,7 +264,7 @@ export default function LiveAttendance({ initialCourseId }) {
 
                 // Log to event feed
                 setEvents((e) => {
-                  if (e.some((ev) => ev.student_id === student.student_id && ev.status === "Present" && !ev.note)) return e;
+                  if (e.some((ev) => ev.student_id === student.student_id && ev.course_id === course && ev.status === "Present" && !ev.note)) return e;
                   return [
                     {
                       id: Math.random().toString(),
@@ -272,6 +273,7 @@ export default function LiveAttendance({ initialCourseId }) {
                       time,
                       status: "Present",
                       distance: o.distance,
+                      course_id: course,
                     },
                     ...e.slice(0, 49),
                   ];
@@ -291,7 +293,7 @@ export default function LiveAttendance({ initialCourseId }) {
                   );
 
                   setEvents((e) => {
-                    if (e.some((ev) => ev.student_id === student.student_id && ev.note === "Already Marked")) return e;
+                    if (e.some((ev) => ev.student_id === student.student_id && ev.course_id === course && ev.note === "Already Marked")) return e;
                     return [
                       {
                         id: Math.random().toString(),
@@ -301,6 +303,7 @@ export default function LiveAttendance({ initialCourseId }) {
                         status: existingRecord.status,
                         distance: o.distance,
                         note: "Already Marked",
+                        course_id: course,
                       },
                       ...e.slice(0, 49),
                     ];
@@ -642,7 +645,7 @@ export default function LiveAttendance({ initialCourseId }) {
                     <div className="text-[10px] text-slate-500 font-mono mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
                       <span>{ev.student_id}</span>
                       <ChevronRight className="w-3 h-3 text-slate-700 shrink-0" />
-                      <span className="truncate max-w-[80px]">{course}</span>
+                      <span className="truncate max-w-[80px]">{ev.course_id}</span>
                       <ChevronRight className="w-3 h-3 text-slate-700 shrink-0" />
                       <span className="text-indigo-400 font-bold shrink-0">{conf}% confidence</span>
                     </div>
