@@ -42,13 +42,7 @@ graph TD
 ## 3. Option B: Server-Side Processing (Recommended for Industrial Scale)
 Instead of streaming high-resolution video to the teacher's browser and running heavy ML inside React, your Python backend processes the CCTV feed directly.
 
-```mermaid
-graph TD
-    CCTV[IP / CCTV Camera] -->|RTSP Stream| PY[Python Backend opencv]
-    PY -->|dlib / face_recognition| Match[Embodied Matcher]
-    Match -->|Mark Attendance| DB[(MongoDB Atlas)]
-    Match -->|WebSocket Event| React[React Frontend Toast UI]
-```
+![IP / CCTV Diagram](./ip-cctv-diagram.png)
 
 ### How this works:
 1. **Python OpenCV Loop:**
