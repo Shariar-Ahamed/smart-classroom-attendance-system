@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 
 // Distance threshold for FaceNet descriptors (lower = stricter).
-const MATCH_THRESHOLD = 0.55;
+const MATCH_THRESHOLD = 0.50;
 
 // How often to run a recognition pass (TICK_MS = 500 ms = roughly 2 fps)
 const TICK_MS = 500;
@@ -38,7 +38,7 @@ export default function LiveAttendance({ initialCourseId }) {
   const [course, setCourse] = useState("");
   const [records, setRecords] = useState([]);
   const [allStudents, setAllStudents] = useState([]);
-  const [scanNotification, setScanNotification] = useState(null);
+  const [notifications, setNotifications] = useState([]);
   const [running, setRunning] = useState(false);
   const [events, setEvents] = useState([]);
   const [todayCount, setTodayCount] = useState(0);
@@ -49,6 +49,31 @@ export default function LiveAttendance({ initialCourseId }) {
   const [modelError, setModelError] = useState(null);
   const loopRef = useRef(null);
   const inFlightRef = useRef(false);
+  const lastNotifiedRef = useRef({});
+  const processedStudentsRef = useRef(new Set());
+
+  const triggerNotification = (type, studentId, studentName, title, message) => {
+    const now = Date.now();
+    const lastTime = lastNotifiedRef.current[studentId] || 0;
+    if (now - lastTime < 8000) return;
+
+    lastNotifiedRef.current[studentId] = now;
+    const newNotif = {
+      id: Math.random().toString(),
+      type,
+      student_id: studentId,
+      name: studentName,
+      title,
+      message,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+    };
+
+    setNotifications((prev) => [newNotif, ...prev].slice(0, 3));
+
+    setTimeout(() => {
+      setNotifications((prev) => prev.filter((n) => n.id !== newNotif.id));
+    }, 3500);
+  };
 
   // Load courses once
   useEffect(() => {
@@ -76,6 +101,7 @@ export default function LiveAttendance({ initialCourseId }) {
     (async () => {
       setStudents(await api.listStudents(course));
       refreshToday();
+      processedStudentsRef.current.clear();
     })();
   }, [course]);
 
@@ -125,6 +151,7 @@ export default function LiveAttendance({ initialCourseId }) {
       setRunning(true);
       setFramesProcessed(0);
       setOverlay([]);
+      processedStudentsRef.current.clear();
     } catch (err) {
       // handled by useWebcam state
     }
@@ -134,6 +161,7 @@ export default function LiveAttendance({ initialCourseId }) {
     stop();
     setRunning(false);
     setOverlay([]);
+    processedStudentsRef.current.clear();
     if (loopRef.current) {
       clearInterval(loopRef.current);
       loopRef.current = null;
@@ -151,7 +179,7 @@ export default function LiveAttendance({ initialCourseId }) {
     }
 
     loopRef.current = setInterval(async () => {
-      if (inFlightRef.current || scanNotification) return;
+      if (inFlightRef.current) return;
       inFlightRef.current = true;
       try {
         const results = await recognizeAllFaces(
@@ -178,20 +206,26 @@ export default function LiveAttendance({ initialCourseId }) {
           const student = allStudents.find((s) => s.student_id === o.student_id);
           if (student) {
             o.name = student.name;
+
+            // Skip if already processed in this scanner session
+            if (processedStudentsRef.current.has(student.student_id)) {
+              o.newlyMarked = true;
+              continue;
+            }
+
             const isEnrolled = students.some((s) => s.student_id === o.student_id);
             const time = new Date().toLocaleTimeString();
 
             if (!isEnrolled) {
+              processedStudentsRef.current.add(student.student_id);
               // State 3: Not Enrolled popup and feed event
-              if (!scanNotification || scanNotification.student_id !== student.student_id) {
-                setScanNotification({
-                  type: "not_enrolled",
-                  student_id: student.student_id,
-                  name: student.name,
-                  title: "Not Enrolled",
-                  message: `Not registered for ${course}`,
-                });
-              }
+              triggerNotification(
+                "not_enrolled",
+                student.student_id,
+                student.name,
+                "Not Enrolled",
+                `Not registered for ${course}`
+              );
 
               setEvents((e) => {
                 if (e.some((ev) => ev.student_id === student.student_id && ev.note === "Not Enrolled")) return e;
@@ -215,18 +249,17 @@ export default function LiveAttendance({ initialCourseId }) {
               const res = await api.markAttendance(o.student_id, course);
               if (res) {
                 o.newlyMarked = true;
+                processedStudentsRef.current.add(student.student_id);
                 setOverlay([...newOverlay]); // trigger re-render of overlay border colors
 
                 // State 1: Newly marked Present popup
-                if (!scanNotification || scanNotification.student_id !== student.student_id) {
-                  setScanNotification({
-                    type: "success",
-                    student_id: student.student_id,
-                    name: student.name,
-                    title: "Attendance Confirmed",
-                    message: "Successfully marked Present",
-                  });
-                }
+                triggerNotification(
+                  "success",
+                  student.student_id,
+                  student.name,
+                  "Attendance Confirmed",
+                  "Successfully marked Present"
+                );
 
                 // Log to event feed
                 setEvents((e) => {
@@ -248,15 +281,14 @@ export default function LiveAttendance({ initialCourseId }) {
                 // State 2: Already Marked check
                 const existingRecord = records.find((r) => r.student_id === student.student_id);
                 if (existingRecord) {
-                  if (!scanNotification || scanNotification.student_id !== student.student_id) {
-                    setScanNotification({
-                      type: "already",
-                      student_id: student.student_id,
-                      name: student.name,
-                      title: "Already Checked In",
-                      message: "Has already attended today",
-                    });
-                  }
+                  processedStudentsRef.current.add(student.student_id);
+                  triggerNotification(
+                    "already",
+                    student.student_id,
+                    student.name,
+                    "Already Checked In",
+                    "Has already attended today"
+                  );
 
                   setEvents((e) => {
                     if (e.some((ev) => ev.student_id === student.student_id && ev.note === "Already Marked")) return e;
@@ -293,7 +325,7 @@ export default function LiveAttendance({ initialCourseId }) {
         loopRef.current = null;
       }
     };
-  }, [running, ready, students, course, allStudents, records, scanNotification]);
+  }, [running, ready, students, course, allStudents, records]);
 
   // Clean stop on unmount
   useEffect(() => {
@@ -314,7 +346,7 @@ export default function LiveAttendance({ initialCourseId }) {
     const vw = videoRef.current.videoWidth || 640;
     const vh = videoRef.current.videoHeight || 480;
 
-    const left = `${(box.x / vw) * 100}%`;
+    const left = `${((vw - box.x - box.width) / vw) * 100}%`;
     const top = `${(box.y / vh) * 100}%`;
     const width = `${(box.width / vw) * 100}%`;
     const height = `${(box.height / vh) * 100}%`;
@@ -454,92 +486,57 @@ export default function LiveAttendance({ initialCourseId }) {
             </>
           )}
 
-          {/* HUD Notification Popup Overlay */}
-          <AnimatePresence>
-            {scanNotification && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 15 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: -15 }}
-                className="absolute inset-0 flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-sm z-30"
-              >
+          {/* Floating non-blocking Toast Queue overlay inside video feed */}
+          <div className="absolute bottom-16 right-3 flex flex-col gap-2 z-30 max-w-[240px] w-full pointer-events-none">
+            <AnimatePresence>
+              {notifications.map((n) => (
                 <motion.div
-                  initial={{ y: 8 }}
-                  animate={{ y: 0 }}
-                  className={`max-w-xs sm:max-w-md w-full border rounded-2xl p-6 shadow-2xl flex flex-col items-center text-center space-y-4 relative ${
-                    scanNotification.type === "success"
-                      ? "bg-emerald-950/90 border-emerald-500/30 text-emerald-100 shadow-emerald-500/5"
-                      : scanNotification.type === "already"
-                      ? "bg-indigo-950/90 border-indigo-500/30 text-indigo-100 shadow-indigo-500/5"
-                      : "bg-amber-950/90 border-amber-500/30 text-amber-100 shadow-amber-500/5"
+                  key={n.id}
+                  initial={{ opacity: 0, x: 50, scale: 0.9 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: 30, scale: 0.95, transition: { duration: 0.2 } }}
+                  className={`pointer-events-auto w-full p-2.5 rounded-xl border backdrop-blur-xl shadow-lg flex items-center gap-2.5 relative overflow-hidden select-none ${
+                    n.type === "success"
+                      ? "bg-emerald-950/85 border-emerald-500/30 text-emerald-100 shadow-emerald-950/20"
+                      : n.type === "already"
+                      ? "bg-indigo-950/85 border-indigo-500/30 text-indigo-100 shadow-indigo-950/20"
+                      : "bg-amber-950/85 border-amber-500/30 text-amber-100 shadow-amber-950/20"
                   }`}
                 >
-                  {/* Close button to stop scanner */}
-                  <button
-                    onClick={() => {
-                      handleStop();
-                      setScanNotification(null);
-                    }}
-                    className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 transition cursor-pointer"
-                    title="Close and Stop Scanner"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                  {/* Animated Icon Container */}
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1, rotate: [0, -10, 10, 0] }}
-                    transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
-                    className={`w-14 h-14 rounded-full flex items-center justify-center border-2 ${
-                      scanNotification.type === "success"
-                        ? "bg-emerald-500/20 border-emerald-400 text-emerald-400"
-                        : scanNotification.type === "already"
-                        ? "bg-indigo-500/20 border-indigo-400 text-indigo-400"
-                        : "bg-amber-500/20 border-amber-400 text-amber-400"
-                    }`}
-                  >
-                    {scanNotification.type === "success" ? (
-                      <motion.svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={3.5}
-                        stroke="currentColor"
-                        className="w-7 h-7"
-                        initial={{ pathLength: 0 }}
-                        animate={{ pathLength: 1 }}
-                        transition={{ duration: 0.35, ease: "easeOut", delay: 0.2 }}
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                      </motion.svg>
-                    ) : scanNotification.type === "already" ? (
-                      <Info className="w-7 h-7" />
+                  {/* Styled indicator ring */}
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${
+                    n.type === "success"
+                      ? "bg-emerald-500/20 border-emerald-400 text-emerald-400"
+                      : n.type === "already"
+                      ? "bg-indigo-500/20 border-indigo-400 text-indigo-400"
+                      : "bg-amber-500/20 border-amber-400 text-amber-400"
+                  }`}>
+                    {n.type === "success" ? (
+                      <span className="font-bold text-sm">✓</span>
+                    ) : n.type === "already" ? (
+                      <span className="font-bold text-xs">ℹ</span>
                     ) : (
-                      <ShieldAlert className="w-7 h-7" />
+                      <span className="font-bold text-xs">⚠</span>
                     )}
-                  </motion.div>
-
-                  <div className="space-y-1.5 w-full">
-                    <h3 className={`text-[10px] font-bold uppercase tracking-widest ${
-                      scanNotification.type === "success"
-                        ? "text-emerald-400"
-                        : scanNotification.type === "already"
-                        ? "text-indigo-400"
-                        : "text-amber-400"
-                    }`}>
-                      {scanNotification.title}
-                    </h3>
-                    <h2 className="text-base sm:text-lg font-bold text-slate-100 truncate w-full px-2">
-                      {scanNotification.name}
-                    </h2>
-                    <p className="text-xs text-slate-400 font-medium">
-                      {scanNotification.message}
-                    </p>
                   </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[10px] font-bold text-slate-100 truncate">
+                      {n.name}
+                    </div>
+                    <div className="text-[8px] text-slate-300 font-medium truncate mt-0.5">
+                      {n.message}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setNotifications((prev) => prev.filter((item) => item.id !== n.id))}
+                    className="p-1 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-md shrink-0 cursor-pointer"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
                 </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              ))}
+            </AnimatePresence>
+          </div>
         </div>
 
         {modelError && (

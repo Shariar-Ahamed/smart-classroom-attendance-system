@@ -61,7 +61,7 @@ export function loadFaceModel() {
 
 const detectorOptions = () =>
   new faceapi.SsdMobilenetv1Options({
-    minConfidence: 0.4,
+    minConfidence: 0.8,
   });
 
 /** Detect ALL faces in a frame and compute their 128-d descriptors. */
